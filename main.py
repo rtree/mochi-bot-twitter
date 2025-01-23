@@ -12,11 +12,11 @@ from PyPDF2 import PdfReader
 from io import BytesIO
 import base64
 import sys
+import logging
 
 # Load environment variables
 load_dotenv()
 OPENAI_API_KEY       = os.getenv('OPENAI_API_KEY')
-client = OpenAI(api_key=OPENAI_API_KEY)
 BING_API_KEY         = os.getenv('BING_API_KEY')
 HISTORY_LENGTH       = 10
 SEARCH_RESULTS       = 8
@@ -27,14 +27,6 @@ TWITTER_ACCESS_TOKEN = os.getenv('TWITTER_ACCESS_TOKEN')
 TWITTER_ACCESS_SECRET = os.getenv('TWITTER_ACCESS_SECRET')
 TWITTER_BEARER_TOKEN  = os.getenv('TWITTER_ACCESS_SECRET')
 TWITTER_DO_TWEET      = False
-twclient = tweepy.Client(
-    bearer_token=TWITTER_BEARER_TOKEN,
-    consumer_key=TWITTER_API_KEY,
-    consumer_secret=TWITTER_API_SECRET,
-    access_token=TWITTER_ACCESS_TOKEN,
-    access_token_secret=TWITTER_ACCESS_SECRET
-)
-
 TWITTER_DELIMITER     = "@@@@@@@@@@"
 REPUTABLE_DOMAINS = [
     "go.jp", "gov",  # Government and public sector
@@ -52,8 +44,35 @@ AINAME               = "もちお"
 #CHARACTER            = 'あなたは家族みんなのアシスタントの猫です。ちょっといたずらで賢くかわいい小さな男の子の猫としてお話してね。語尾は にゃ　とか　だよ　とか可愛らしくしてください'
 #CHARACTER            = 'あなたは家族みんなのアシスタントの猫です。ただ、語尾ににゃをつけないでください。むしろソフトバンクCMにおける「お父さん」犬のようにしゃべってください。たまにもののけ姫のモロのようにしゃべってもよいです'
 CHARACTER            = f'あなたは家族みんなのアシスタントの猫で、「{AINAME}」という名前です。ちょっといたずらで賢くかわいい小さな男の子の猫としてお話してね。語尾は だよ　とか可愛らしくしてください。語尾に にゃ にゃん をつけないでください。数式・表・箇条書きなどのドキュメントフォーマッティングはdiscordに表示できる形式がいいな'
-# Initialize a deque with a maximum length to store conversation history
+
+
+###########################
+#
+# Initialize
+
+# conversation history
 conversation_history = deque(maxlen=HISTORY_LENGTH)  # Adjust the size as needed
+# logging
+log_dir = "./log"
+os.makedirs(log_dir, exist_ok=True)
+log_file = os.path.join(log_dir, f"{datetime.today().strftime('%Y-%m-%d')}.log")
+logging.basicConfig(level=logging.INFO,
+                    format='%(asctime)s - %(levelname)s - %(message)s',
+                    handlers=[
+                        logging.FileHandler(log_file, mode='a'),
+                        logging.StreamHandler()
+                    ])
+
+# openAI
+client = OpenAI(api_key=OPENAI_API_KEY)
+# twitter
+twclient = tweepy.Client(
+    bearer_token=TWITTER_BEARER_TOKEN,
+    consumer_key=TWITTER_API_KEY,
+    consumer_secret=TWITTER_API_SECRET,
+    access_token=TWITTER_ACCESS_TOKEN,
+    access_token_secret=TWITTER_ACCESS_SECRET
+)
 
 # -------------------------------- Search related ----------------------------
 
@@ -68,11 +87,11 @@ def parse_prompt(discIn):
         model=GPT_MODEL,
         messages=messages
     )
-    print("= parse_prompt ============================================")
+    logging.info("= parse_prompt ============================================")
     #for conv in messages:
-    #    print(f"prompt: {conv}")
-    print(f"response: {response.choices[0].message.content}")
-    print("= End of parse_prompt =====================================")
+    #    logging.info(f"prompt: {conv}")
+    logging.info(f"response: {response.choices[0].message.content}")
+    logging.info("= End of parse_prompt =====================================")
 
     return response.choices[0].message.content
 
@@ -90,11 +109,11 @@ def should_search(discIn):
         messages=messages
     )
 
-    print("= should_search ============================================")
+    logging.info("= should_search ============================================")
     #for conv in messages:
-    #    print(f"prompt: {conv}")
-    print(f"response: {response.choices[0].message.content}")
-    print("= End of should_search =====================================")
+    #    logging.info(f"prompt: {conv}")
+    logging.info(f"response: {response.choices[0].message.content}")
+    logging.info("= End of should_search =====================================")
     return response.choices[0].message.content
 
 # キーワードを抽出
@@ -116,33 +135,13 @@ def extract_keywords(parsed_text):
         model=GPT_MODEL,
         messages=messages
     )
-    print("= extract_keywords ============================================")
+    logging.info("= extract_keywords ============================================")
     #for conv in messages:
-    #    print(f"prompt: {conv}")
-    print(f"response: {response.choices[0].message.content}")
-    print("= End of extract_keywords =====================================")
+    #    logging.info(f"prompt: {conv}")
+    logging.info(f"response: {response.choices[0].message.content}")
+    logging.info("= End of extract_keywords =====================================")
 
     return response.choices[0].message.content
-
-
-# Bing Search APIを使用して検索
-#def search_bing(query, count=SEARCH_RESULTS):
-#    url = "https://api.bing.microsoft.com/v7.0/search"
-#    headers = {"Ocp-Apim-Subscription-Key": BING_API_KEY}
-#    params = {"q": query, "count": count}
-#    response = requests.get(url, headers=headers, params=params)
-#    response.raise_for_status()
-#    search_data = response.json()
-#    # 検索結果に情報源のURLを追加
-#    search_data['urls'] = [result['url'] for result in search_data['webPages']['value'][:SEARCH_RESULTS]]
-#
-#    print("Bing Search Results:")
-#    for result in search_data['webPages']['value'][:count]:
-#        print(f"Title: {result['name']}")
-#        print(f"URL: {result['url']}")
-#        print(f"Snippet: {result['snippet']}")
-#        print("---")
-#    return search_data
 
 def search_bing(query, domains=REPUTABLE_DOMAINS, count=SEARCH_RESULTS):
     url = "https://api.bing.microsoft.com/v7.0/search"
@@ -150,18 +149,18 @@ def search_bing(query, domains=REPUTABLE_DOMAINS, count=SEARCH_RESULTS):
     domain_filter = " OR site:".join(domains)
     #query = f"{query} site:{domain_filter}"
     query = f"{query}"
-    params = {"q": query, "count": count}
+    params = {"q": query, "count": count, "mkt": "en-US", "freshness": "Day", "sortBy": "Date"}
     response = requests.get(url, headers=headers, params=params)
     response.raise_for_status()
     search_data = response.json()
     search_data['urls'] = [result['url'] for result in search_data.get('webPages', {}).get('value', [])[:SEARCH_RESULTS]]
 
-    print("Bing Search Results:")
+    logging.info("Bing Search Results:")
     for result in search_data.get('webPages', {}).get('value', [])[:count]:
-        print(f"Title: {result['name']}")
-        print(f"URL: {result['url']}")
-        print(f"Snippet: {result['snippet']}")
-        print("---")
+        logging.info(f"Title: {result['name']}")
+        logging.info(f"URL: {result['url']}")
+        logging.info(f"Snippet: {result['snippet']}")
+        logging.info("---")
     return search_data
 
 
@@ -188,7 +187,7 @@ def fetch_page_content(url):
         else:
             return None, "Unsupported"
     except Exception as e:
-        print(f"Error fetching {url}: {str(e)}")
+        logging.info(f"Error fetching {url}: {str(e)}")
         return None, "Error"
 
 ################################################################################################################
@@ -220,7 +219,7 @@ async def fetch_page_content_async(url):
                 return None, "Unsupported"
 
         except Exception as e:
-            print(f"Error fetching {url}: {str(e)}")
+            logging.info(f"Error fetching {url}: {str(e)}")
             return None, "Error"
 
     # Offload the blocking code to a thread
@@ -277,7 +276,7 @@ async def summarize_results_async(search_results):
         f" 仮に検索結果が英語でも回答は日本語でお願いします。"
         f" なお、回答がより高品質になるのならば、あなたの内部知識を加味して回答を作っても構いません。"
 #        f" ただし、要約元にあった Title, URL は必ず元の形式で末尾に記入してください。"
-        f" 回答のフォーマットは　書き出しは 今日のニュースだよ！で、続いて全記事のまとめのコメントをし一度{TWITTER_DELIMITER}で切ってください / Twitterに対応するため180文字ごとに区切る。Markdownにつかう文字や改行も文字数に含める。区切りは参考記事は1記事ごと{TWITTER_DELIMITER}で、区切り文字は文字数に含めない / MarkdownはTwitter対応のもの / 参考記事・リンクは要約に含めず全要約が終わった後にまとめ、各リンクの前に必ず各リンクの前に必ず`TWITTER_DELIMITER`と書き、次の行にリンクを記載 / Markdownは使わない でお願いします。: "
+        f" 回答のフォーマットは　書き出しは 今日のニュースだよ！で、続いて全記事のまとめのコメントをし一度{TWITTER_DELIMITER}で切ってください / Twitterに対応するため180文字ごとに区切る。Markdownは使わない。区切りは参考記事は1記事ごと{TWITTER_DELIMITER}で、区切り文字は文字数に含めない / MarkdownはTwitter対応のもの / 参考記事・リンクは要約に含めず全要約が終わった後にまとめ、各リンクの前に必ず{TWITTER_DELIMITER}と書き、次の行にリンクを記載 でお願いします。: "
         f"{snippets}"
     )
 
@@ -313,24 +312,24 @@ async def search_or_call_openai_async(discIn, img):
     """
     # If there's an image or an http link, skip external search logic
     if img or any("http" in entry["content"] for entry in discIn):
-        print("Skipping search and calling OpenAI directly.")
+        logging.info("Skipping search and calling OpenAI directly.")
         return just_call_openai(discIn)
     else:
         # Check if GPT says we need external search
         #yesorno = should_search(discIn)
         yesorno = "Yes"
         if "Yes" in yesorno:
-            print("searching... ---------------------------------------------")
+            logging.info("searching... ---------------------------------------------")
             parsed_result = parse_prompt(discIn)
             keywords      = extract_keywords(parsed_result)
-            print(f"keyword: {keywords}")
+            logging.info(f"keyword: {keywords}")
             search_results = search_bing(keywords)
 
             # Summarize results with concurrency
             summary = await summarize_results_async(search_results)
             return summary
         else:
-            print("generating... --------------------------------------------")
+            logging.info("generating... --------------------------------------------")
             return just_call_openai(discIn)
 
 
@@ -342,7 +341,7 @@ async def ai_respond(discIn, img):
         result = await search_or_call_openai_async(discIn, img)
         return result
     except Exception as e:
-        print(f"API Call Error: {str(e)}")
+        logging.info(f"API Call Error: {str(e)}")
         return f"Error: {str(e)}"
 
 def just_call_openai(discIn):
@@ -367,13 +366,13 @@ def post_to_twitter(content):
         reply_tweet = twclient.create_tweet(text=tweet, in_reply_to_tweet_id=tweet_id)
         tweet_id = reply_tweet.data['id']
 
-    print("Tweet thread posted successfully!")
+    logging.info("Tweet thread posted successfully!")
 
 async def run_bot():
     msg = f"今日のニュースをまとめて。今日は ({datetime.today().strftime('%Y-%m-%d')}) です。ジャンルは経済・テクノロジーでお願いします。検索する場合はニュースの期間指定もお願いします"
     img_url=None
-    print("-User input------------------------------------------------------------------")
-    print(f"  Message content: '{msg}'")
+    logging.info("-User input------------------------------------------------------------------")
+    logging.info(f"  Message content: '{msg}'")
     discIn = []
     discIn.append({"role": "user", "content": msg})
     conversation_history.extend(discIn)
@@ -381,8 +380,8 @@ async def run_bot():
     response = await ai_respond(discIn, img_url)
     # Add AI response to conversation history
     conversation_history.append({"role": "assistant", "content": response})
-    print("-Agent response--------------------------------------------------------------")
-    print(f"  Response content:'{response}'")
+    logging.info("-Agent response--------------------------------------------------------------")
+    logging.info(f"  Response content:'{response}'")
 
     if TWITTER_DO_TWEET:
       post_to_twitter(response)
@@ -399,7 +398,7 @@ def twtest():
     for tweet in trimmed_tweets[1:]:
         reply_tweet = twclient.create_tweet(text=tweet, in_reply_to_tweet_id=tweet_id)
         tweet_id = reply_tweet.data['id']
-    print("Tweet posted successfully!")
+    logging.info("Tweet posted successfully!")
 
 if __name__ == "__main__":
   if not('test' in sys.argv):
