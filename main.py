@@ -26,7 +26,7 @@ TWITTER_API_SECRET = os.getenv('TWITTER_API_SECRET')
 TWITTER_ACCESS_TOKEN = os.getenv('TWITTER_ACCESS_TOKEN')
 TWITTER_ACCESS_SECRET = os.getenv('TWITTER_ACCESS_SECRET')
 TWITTER_BEARER_TOKEN  = os.getenv('TWITTER_ACCESS_SECRET')
-TWITTER_DO_TWEET      = false
+TWITTER_DO_TWEET      = False
 twclient = tweepy.Client(
     bearer_token=TWITTER_BEARER_TOKEN,
     consumer_key=TWITTER_API_KEY,
@@ -277,7 +277,7 @@ async def summarize_results_async(search_results):
         f" 仮に検索結果が英語でも回答は日本語でお願いします。"
         f" なお、回答がより高品質になるのならば、あなたの内部知識を加味して回答を作っても構いません。"
 #        f" ただし、要約元にあった Title, URL は必ず元の形式で末尾に記入してください。"
-        f" 回答のフォーマットは　書き出しは 今日のニュースだよ！で、続いて全記事のまとめのコメントをし一度{TWITTER_DELIMITER}で切ってください / Twitterに対応するため180文字ごとに区切る。Markdownにつかう文字や改行も文字数に含める。区切りは参考記事は1記事ごと{TWITTER_DELIMITER}で、区切り文字は文字数に含めない / MarkdownはTwitter対応のもの / 参考記事・リンクは要約に含めず全要約が終わった後にまとめ1リンクごと{TWITTER_DELIMITER}で区切る / Markdownは使わない でお願いします。: "
+        f" 回答のフォーマットは　書き出しは 今日のニュースだよ！で、続いて全記事のまとめのコメントをし一度{TWITTER_DELIMITER}で切ってください / Twitterに対応するため180文字ごとに区切る。Markdownにつかう文字や改行も文字数に含める。区切りは参考記事は1記事ごと{TWITTER_DELIMITER}で、区切り文字は文字数に含めない / MarkdownはTwitter対応のもの / 参考記事・リンクは要約に含めず全要約が終わった後にまとめ、各リンクの前に必ず各リンクの前に必ず`TWITTER_DELIMITER`と書き、次の行にリンクを記載 / Markdownは使わない でお願いします。: "
         f"{snippets}"
     )
 
@@ -384,20 +384,22 @@ async def run_bot():
     print("-Agent response--------------------------------------------------------------")
     print(f"  Response content:'{response}'")
 
-    post_to_twitter(response)
+    if TWITTER_DO_TWEET:
+      post_to_twitter(response)
 
 def twtest():
-  content = "あいうえお。確認用です"
-  tweets = content.split(TWITTER_DELIMITER)
-  trimmed_tweets = [tweet[:199] for tweet in tweets]
+  if TWITTER_DO_TWEET:
+    content = "あいうえお。確認用です"
+    tweets = content.split(TWITTER_DELIMITER)
+    trimmed_tweets = [tweet[:199] for tweet in tweets]
 
-  first_tweet = twclient.create_tweet(text=trimmed_tweets[0])
-  tweet_id = first_tweet.data['id']
-  
-  for tweet in trimmed_tweets[1:]:
-      reply_tweet = twclient.create_tweet(text=tweet, in_reply_to_tweet_id=tweet_id)
-      tweet_id = reply_tweet.data['id']
-  print("Tweet posted successfully!")
+    first_tweet = twclient.create_tweet(text=trimmed_tweets[0])
+    tweet_id = first_tweet.data['id']
+    
+    for tweet in trimmed_tweets[1:]:
+        reply_tweet = twclient.create_tweet(text=tweet, in_reply_to_tweet_id=tweet_id)
+        tweet_id = reply_tweet.data['id']
+    print("Tweet posted successfully!")
 
 if __name__ == "__main__":
   if not('test' in sys.argv):
