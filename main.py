@@ -276,7 +276,7 @@ async def summarize_results_async(search_results):
         f" 仮に検索結果が英語でも回答は日本語でお願いします。"
         f" なお、回答がより高品質になるのならば、あなたの内部知識を加味して回答を作っても構いません。"
 #        f" ただし、要約元にあった Title, URL は必ず元の形式で末尾に記入してください。"
-        f" 回答のフォーマットは　書き出しは 今日のニュースだよ！で、続いて全記事のまとめのコメントをし一度{TWITTER_DELIMITER}で切ってください / Twitterに対応するため180文字ごとに区切る。Markdownは使わない。区切りは参考記事は1記事ごと{TWITTER_DELIMITER}で、区切り文字は文字数に含めない / MarkdownはTwitter対応のもの / 参考記事・リンクは要約に含めず全要約が終わった後にまとめ、各リンクの前に必ず{TWITTER_DELIMITER}と書き、次の行にリンクを記載 でお願いします。: "
+        f" 回答のフォーマットは　書き出しは 今日のニュースだよ！で、続いて全記事のまとめのコメントをし一度{TWITTER_DELIMITER}で切ってください / 投稿先はX(Twitter)なので見出しや改行含め190文字ごとに区切る。Markdown無し。区切りは1記事ごと{TWITTER_DELIMITER}で、区切り文字は文字数に含めない / MarkdownはTwitter対応のもの / 参考記事・リンクは要約に含めず全要約が終わった後にまとめ、各リンクの前に必ず{TWITTER_DELIMITER}と書き、次の行にリンクを記載 でお願いします。: "
         f"{snippets}"
     )
 
@@ -359,14 +359,43 @@ def post_to_twitter(content):
     tweets = content.split(TWITTER_DELIMITER)
     trimmed_tweets = [tweet[:199] for tweet in tweets]
 
+    try:
+        first_tweet = twclient.create_tweet(text=trimmed_tweets[0])
+        tweet_id = first_tweet.data['id']
+        logging.info("First tweet posted successfully.")
+        
+        for tweet in trimmed_tweets[1:]:
+            time.sleep(2)  # Wait for 2 seconds between tweets
+
+            reply_tweet = twclient.create_tweet(text=tweet, in_reply_to_tweet_id=tweet_id)
+            tweet_id = reply_tweet.data['id']
+            logging.info("Reply tweet posted successfully.")
+        logging.info("Tweet thread posted successfully!")
+
+    except tweepy.errors.TooManyRequests as e:
+        reset_time = e.response.headers.get('x-rate-limit-reset')
+        reset_time_human = datetime.utcfromtimestamp(int(reset_time)).strftime('%Y-%m-%d %H:%M:%S')
+        logging.error(f"Rate limit exceeded.: ")
+        logging.error(f" Try again at           : {reset_time_human}")
+        logging.error(f" x-rate-limit-limit     : {e.response.headers.get('x-rate-limit-limit')}")
+        logging.error(f" x-rate-limit-remaining : {e.response.headers.get('x-rate-limit-remaining')}")
+        return
+
+def twtest():
+  if TWITTER_DO_TWEET:
+    content = "あいうえお。確認用です"
+    tweets = content.split(TWITTER_DELIMITER)
+    trimmed_tweets = [tweet[:199] for tweet in tweets]
+
     first_tweet = twclient.create_tweet(text=trimmed_tweets[0])
     tweet_id = first_tweet.data['id']
     
     for tweet in trimmed_tweets[1:]:
+        time.sleep(2)  # Wait for 2 seconds between tweets
         reply_tweet = twclient.create_tweet(text=tweet, in_reply_to_tweet_id=tweet_id)
         tweet_id = reply_tweet.data['id']
+    logging.info("Tweet posted successfully!")
 
-    logging.info("Tweet thread posted successfully!")
 
 async def run_bot():
     msg = f"今日のニュースをまとめて。今日は ({datetime.today().strftime('%Y-%m-%d')}) です。ジャンルは経済・テクノロジーでお願いします。検索する場合はニュースの期間指定もお願いします"
@@ -385,20 +414,6 @@ async def run_bot():
 
     if TWITTER_DO_TWEET:
       post_to_twitter(response)
-
-def twtest():
-  if TWITTER_DO_TWEET:
-    content = "あいうえお。確認用です"
-    tweets = content.split(TWITTER_DELIMITER)
-    trimmed_tweets = [tweet[:199] for tweet in tweets]
-
-    first_tweet = twclient.create_tweet(text=trimmed_tweets[0])
-    tweet_id = first_tweet.data['id']
-    
-    for tweet in trimmed_tweets[1:]:
-        reply_tweet = twclient.create_tweet(text=tweet, in_reply_to_tweet_id=tweet_id)
-        tweet_id = reply_tweet.data['id']
-    logging.info("Tweet posted successfully!")
 
 if __name__ == "__main__":
   if not('test' in sys.argv):
