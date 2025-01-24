@@ -13,6 +13,7 @@ from io import BytesIO
 import base64
 import sys
 import logging
+import time
 
 # Load environment variables
 load_dotenv()
