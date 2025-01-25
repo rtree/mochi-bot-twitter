@@ -164,7 +164,6 @@ def search_bing(query, domains=REPUTABLE_DOMAINS, count=SEARCH_RESULTS):
         logging.info("---")
     return search_data
 
-
 def fetch_page_content(url):
     try:
         response = requests.get(url, timeout=10)
