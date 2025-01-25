@@ -169,7 +169,7 @@ def fetch_page_content(url):
         response = requests.get(url, timeout=10)
         response.raise_for_status()
         content_type = response.headers.get('Content-Type', '')
-
+        
         if 'application/pdf' in content_type:
             pdf_reader = PdfReader(BytesIO(response.content))
             pdf_text = "".join(page.extract_text() for page in pdf_reader.pages)
@@ -190,7 +190,7 @@ def fetch_page_content(url):
         logging.info(f"Error fetching {url}: {str(e)}")
         return None, "Error"
 
-################################################################################################################
+###############################################################################################################
 
 async def fetch_page_content_async(url):
     """
