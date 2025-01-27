@@ -20,7 +20,7 @@ load_dotenv()
 OPENAI_API_KEY       = os.getenv('OPENAI_API_KEY')
 BING_API_KEY         = os.getenv('BING_API_KEY')
 HISTORY_LENGTH       = 10
-SEARCH_RESULTS       = 8
+SEARCH_RESULTS       = 15
 SEARCH_MAX_CONTENT_LENGTH   = 5000
 TWITTER_API_KEY = os.getenv('TWITTER_API_KEY')
 TWITTER_API_SECRET = os.getenv('TWITTER_API_SECRET')
@@ -269,7 +269,11 @@ async def summarize_results_async(search_results):
     Calls GPT to summarize the combined content from search results.
     """
     snippets = await summarize_results_with_pages_async(search_results)
-
+    logging.info("= summarize_results_async ============================================")
+    #for conv in messages:
+    #    logging.info(f"prompt: {conv}")
+    logging.info(f"snippets: {snippets}")
+    logging.info("= End of summarize_results_async =====================================")
     p_src = (
         f"{CHARACTER}。あなたは検索結果を要約し、調査報告として回答を作成します。"
         f" 会話履歴を踏まえつつ私が知りたいことの主旨を把握の上で、以下の検索結果を要約し回答を作ってください。"
