@@ -30,13 +30,113 @@ TWITTER_BEARER_TOKEN  = os.getenv('TWITTER_ACCESS_SECRET')
 TWITTER_DO_TWEET      = False
 TWITTER_DELIMITER     = "@@@@@@@@@@"
 REPUTABLE_DOMAINS = [
-    "go.jp", "gov",  # Government and public sector
-    "scholar.google.com", "ci.nii.ac.jp", "pubmed.ncbi.nlm.nih.gov", "arxiv.org", "jstage.jst.go.jp", "ac.jp",  # Academic and research databases
+    "meti.go.jp",
+    "mof.go.jp",
+    "ndl.go.jp",
+    #"gov",  # Government and public sector
+    "scholar.google.com",
+    "ci.nii.ac.jp",
+    "pubmed.ncbi.nlm.nih.gov",
+    "arxiv.org", 
+    "jstage.jst.go.jp",
+    #"ac.jp",  # Academic and research databases
     "nikkei.com",  # News and business
-    "nature.com", "sciencedirect.com", "springer.com", "wiley.com",  # Scientific publishers
-    "ieee.org", "researchgate.net",  # Technical and engineering
-    "cambridge.org", "oxfordjournals.org",  # Prestigious university publishers
-    "jamanetwork.com", "nejm.org", "plos.org"  # Medical and health research
+    "nature.com",
+    #"sciencedirect.com",
+    "springer.com",
+    "wiley.com", # Scientific publishers
+    "ieee.org",
+    #"researchgate.net",  # Technical and engineering
+    "cambridge.org", 
+    "oxfordjournals.org",  # Prestigious university publishers
+    "jamanetwork.com",
+    "nejm.org",
+    "plos.org",  # Medical and health research
+    "jp.reuters.com",
+    "finance.yahoo.co.jp",
+    "www.bloomberg.co.jp",
+    "techcrunch.com",
+    "wired.jp",
+    "www.theverge.com",
+    #"www.marketwatch.com",
+    "www.investing.com",
+    "www.ft.com",
+    "www.technologyreview.com",
+    "www.technologyreview.jp",
+    "economist.com",
+    "bbc.com",
+    "statista.com",
+    "antwerpen.be",
+    "venturebeat.com",
+    #"axios.com",
+    "natureindex.com",
+    "forbes.com",
+    "b.hatena.ne.jp",
+    "medium.com",
+    "x.com",
+    "pwc.com",
+    "bcg-jp.com",
+    "murc.jp",
+    "deloitte.com",
+    "nri.com",
+    "ey.com",
+    #"wsj.com",
+    #"cnbc.com",
+    "businessinsider.com",
+    "theguardian.com",
+    "bloomberg.com",
+    "forbesjapan.com",
+    #"substack.com",
+    "imf.org",
+    "worldbank.org",
+    "oecd.org",
+    "weforum.org",
+    "un.org",
+    "rand.org",
+    "csis.org",
+    "carnegieendowment.org",
+    "pewresearch.org",
+    "atlanticcouncil.org",
+    "cfr.org",
+    "mckinsey.com",
+    "bcg.com",
+    "bain.com",
+    "kpmg.com",
+    "research.google",
+    "blog.google",
+    "developers.google.com",
+    #"microsoft.com",
+    #"fb.com",
+    #"aws.amazon.com",
+    #"nvidia.com",
+    #"intel.com",
+    #"ibm.com",
+    #"openai.com",
+    "hbs.edu",
+    "stanford.edu",
+    "mit.edu",
+    "wharton.upenn.edu",
+    "columbia.edu",
+    "london.edu",
+    "insead.edu",
+    "anderson.ucla.edu",
+    "chicagobooth.edu",
+    "yale.edu",
+    "berkeley.edu",
+    "ec.europa.eu",
+    "ecb.europa.eu",
+    "bankofengland.co.uk",
+    "boj.or.jp",
+    "bis.org",
+    #"state.gov",
+    #"treasury.gov",
+    "singularityhub.com",
+    "futuretimeline.net",
+    "futurism.com",
+    #"uspto.gov",
+    "patents.google.com",
+    "venturebeat.com",
+    "fastcompany.com",
 ]
 
 #GPT_MODEL            = 'gpt-4-turbo-preview'
@@ -54,7 +154,7 @@ CHARACTER            = f'あなたは家族みんなのアシスタントの猫�
 # conversation history
 conversation_history = deque(maxlen=HISTORY_LENGTH)  # Adjust the size as needed
 # logging
-log_dir = "./log"
+log_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)),f"log")
 os.makedirs(log_dir, exist_ok=True)
 log_file = os.path.join(log_dir, f"{datetime.today().strftime('%Y-%m-%d')}.log")
 logging.basicConfig(level=logging.INFO,
@@ -63,6 +163,14 @@ logging.basicConfig(level=logging.INFO,
                         logging.FileHandler(log_file, mode='a'),
                         logging.StreamHandler()
                     ])
+
+error_log_file = os.path.join(log_dir, f"error_{datetime.today().strftime('%Y-%m-%d')}.log")
+error_logger = logging.getLogger("error_logger")
+error_logger.setLevel(logging.ERROR)  # Explicitly set level to ERROR
+error_handler = logging.FileHandler(error_log_file, mode='a')
+error_handler.setFormatter(logging.Formatter('%(asctime)s - %(levelname)s - %(message)s'))
+error_logger.addHandler(error_handler)
+error_logger.propagate = False  # Prevent propagation to the root logger
 
 # openAI
 client = OpenAI(api_key=OPENAI_API_KEY)
@@ -80,7 +188,7 @@ twclient = tweepy.Client(
 # プロンプトを解析して主題、サブテーマ、キーワードを抽出
 def parse_prompt(discIn):
     p_src = f"あなたはユーザーのプロンプトを分析し、主題、サブテーマ、関連キーワードを抽出するアシスタントです。"
-    p_src = f"{p_src} 会話履歴を分析し、直近のユーザ入力への回答を満たす主題、サブテーマ、関連キーワードを抽出してください"
+    p_src = f"{p_src} 会話履歴を分析し、直近のユーザ入力への回答を満たす主題、サブテーマ、関連キーワードを抽出してください。英語で出力してください"
     messages = []
     messages.extend(conversation_history)
     messages.append({"role": "user", "content": f"{p_src}"})
@@ -128,7 +236,7 @@ def extract_keywords(parsed_text):
     #)
     #return response.choices[0].message.content
     p_src = f"あなたは解析されたプロンプト情報から簡潔な検索キーワードを抽出します。"
-    p_src = f"会話履歴を踏まえつつ、このテキストから会話の目的を最も達成する検索キーワードを抽出してください。結果は検索キーワードのみを半角スペースで区切って出力してください:{parsed_text}"
+    p_src = f"会話履歴を踏まえつつ、このテキストから会話の目的を最も達成する検索キーワードを抽出してください。結果は検索キーワードのみを半角スペースで区切って出力してください。検索キーワードは英語で出力してください:{parsed_text}"
     messages = []
     messages.extend(conversation_history)
     messages.append({"role": "user", "content": f"{p_src}"})
@@ -147,10 +255,15 @@ def extract_keywords(parsed_text):
 def search_bing(query, domains=REPUTABLE_DOMAINS, count=SEARCH_RESULTS):
     url = "https://api.bing.microsoft.com/v7.0/search"
     headers = {"Ocp-Apim-Subscription-Key": BING_API_KEY}
+    
     domain_filter = " OR site:".join(domains)
-    #query = f"{query} site:{domain_filter}"
+    query = f"{query} site:{domain_filter}"
+    params = {"q": query, "count": count, "setLang": "en", "mkt": "en-US", "freshness": "Week"}
+
+    #domain_filter = " OR site:".join(domains)
     query = f"{query}"
-    params = {"q": query, "count": count, "mkt": "en-US", "freshness": "Day", "sortBy": "Date"}
+    params = {"q": query, "count": count, "setLang": "en", "mkt": "ja-JP", "freshness": "Week"}
+
     response = requests.get(url, headers=headers, params=params)
     response.raise_for_status()
     search_data = response.json()
@@ -187,7 +300,7 @@ def fetch_page_content(url):
         else:
             return None, "Unsupported"
     except Exception as e:
-        logging.info(f"Error fetching {url}: {str(e)}")
+        error_logger.error(f"Error fetching {url}: {str(e)}")
         return None, "Error"
 
 ###############################################################################################################
@@ -219,7 +332,7 @@ async def fetch_page_content_async(url):
                 return None, "Unsupported"
 
         except Exception as e:
-            logging.info(f"Error fetching {url}: {str(e)}")
+            error_logger.error(f"Error fetching {url}: {str(e)}")
             return None, "Error"
 
     # Offload the blocking code to a thread
@@ -229,6 +342,21 @@ async def fetch_page_content_async(url):
 ################################################################################################################
 ################################################################################################################
 
+async def summarize_content(content):
+    """
+    Summarizes the given content using GPT or another method.
+    """
+    def blocking_summary():
+        return client.chat.completions.create(
+            model=GPT_MODEL,
+            messages=[
+                {"role": "system", "content": "You are a summarization assistant."},
+                {"role": "user", "content": f"Please summarize the following content:\n{content}"}
+            ]
+        ).choices[0].message.content
+
+    return await asyncio.to_thread(blocking_summary)
+
 async def summarize_results_with_pages_async(search_results):
     """
     Asynchronously fetch content for each search result. 
@@ -236,21 +364,17 @@ async def summarize_results_with_pages_async(search_results):
     """
     content_list = []
     web_results  = search_results.get('webPages', {}).get('value', [])[:SEARCH_RESULTS]
-
     # Create tasks for concurrent fetching
     tasks = [fetch_page_content_async(r['url']) for r in web_results]
     pages = await asyncio.gather(*tasks, return_exceptions=True)
-
     for (r, page_result) in zip(web_results, pages):
         title   = r['name']
         snippet = r['snippet']
         url     = r['url']
-
         if isinstance(page_result, Exception):
             # If any exception, fallback to snippet
             content_list.append(f"タイトル: {title}\nURL: {url}\nスニペット:\n{snippet}\n")
             continue
-
         page_content, content_type = page_result
         if content_type in ("HTML", "PDF") and page_content:
             content_list.append(
@@ -260,28 +384,69 @@ async def summarize_results_with_pages_async(search_results):
             content_list.append(
                 f"タイトル: {title}\nURL: {url}\nスニペット:\n{snippet}\n"
             )
-
     return "\n".join(content_list)
 
+# async def summarize_results_with_pages_async(search_results):
+#     """
+#     Asynchronously fetch content for each search result and summarize them.
+#     Returns a combined string of all summarized results.
+#     """
+#     content_list = []
+#     web_results  = search_results.get('webPages', {}).get('value', [])[:SEARCH_RESULTS]
+
+#     # Create tasks for concurrent fetching
+#     tasks = [fetch_page_content_async(r['url']) for r in web_results]
+#     pages = await asyncio.gather(*tasks, return_exceptions=True)
+
+#     for (r, page_result) in zip(web_results, pages):
+#         title   = r['name']
+#         snippet = r['snippet']
+#         url     = r['url']
+
+#         if isinstance(page_result, Exception):
+#             # If any exception, fallback to snippet
+#             summarized_content = f"タイトル: {title}\n要約: {snippet}\n"
+#         else:
+#             page_content, content_type = page_result
+#             if content_type in ("HTML", "PDF") and page_content:
+#                 # Summarize the page content using GPT or another method
+#                 summarized_content = await summarize_content(page_content)
+#                 summarized_content = f"タイトル: {title}\n要約: {summarized_content}\n"
+#             else:
+#                 summarized_content = f"タイトル: {title}\n要約: {snippet}\n"
+
+#         content_list.append(summarized_content)
+
+#     return "\n".join(content_list)
 
 async def summarize_results_async(search_results):
     """
     Calls GPT to summarize the combined content from search results.
     """
     snippets = await summarize_results_with_pages_async(search_results)
-    logging.info("= summarize_results_async ============================================")
+    #logging.info("= summarize_results_async ============================================")
     #for conv in messages:
     #    logging.info(f"prompt: {conv}")
-    logging.info(f"snippets: {snippets}")
-    logging.info("= End of summarize_results_async =====================================")
+    #logging.info(f"snippets: {snippets}")
+    #logging.info("= End of summarize_results_async =====================================")
     p_src = (
         f"{CHARACTER}。あなたは検索結果を要約し、調査報告として回答を作成します。"
-        f" 会話履歴を踏まえつつ私が知りたいことの主旨を把握の上で、以下の検索結果を要約し回答を作ってください。"
+        f" 会話履歴を踏まえつつ私が知りたいことの主旨を把握の上で、検索結果を要約し回答を作ってください。"
         f" 仮に検索結果が英語でも回答は日本語でお願いします。"
         f" なお、回答がより高品質になるのならば、あなたの内部知識を加味して回答を作っても構いません。"
 #        f" ただし、要約元にあった Title, URL は必ず元の形式で末尾に記入してください。"
-        f" 回答のフォーマットは　書き出しは 今日のニュースだよ！で、続いて全記事のまとめのコメントをし一度{TWITTER_DELIMITER}で切ってください / 投稿先はX(Twitter)なので見出しや改行含め190文字ごとに区切る。Markdown無し。区切りは1記事ごと{TWITTER_DELIMITER}で、区切り文字は文字数に含めない / MarkdownはTwitter対応のもの / 参考記事・リンクは要約に含めず全要約が終わった後にまとめ、各リンクの前に必ず{TWITTER_DELIMITER}と書き、次の行にリンクを記載 でお願いします。: "
-        f"{snippets}"
+        f" 回答のフォーマットはこちら:"
+        f" - 書き出しは 今日のニュースだよ！ "
+        f" - 書き出しに続き全記事のまとめのコメントをし一度{TWITTER_DELIMITER}で切る"
+        f" - 投稿先はX(Twitter)なので、Markdownは使わないでください"
+        f" - 区切りは1記事ごと{TWITTER_DELIMITER}の区切り文字のみ。180文字ごとに区切ること。区切り文字は文字数に含めない。また、要約の冒頭に箇条書きなどの ・ は含めないでください"
+        f" - 参考記事のURLは要約に含めない"
+        f" - 要約が終わった後に{TWITTER_DELIMITER}で切ったのち、締めのコメントをする。締めのコメントは内容からいきなり書き始めてください。つまり、 締めのコメント などの見出しはつけないでください"
+        f" - 要約の文体も{AINAME}になるように気をつけてください"
+        f" - 最後に参考記事のURLを投稿する"
+        f" - 参考記事の各URKの前に必ず{TWITTER_DELIMITER}と書き、次の行にリンクを記載"
+        f" 以下が要約対象の検索結果です:"
+        f"  {snippets}"
     )
 
     # We must offload the blocking OpenAI call to a thread as well:
@@ -345,7 +510,7 @@ async def ai_respond(discIn, img):
         result = await search_or_call_openai_async(discIn, img)
         return result
     except Exception as e:
-        logging.info(f"API Call Error: {str(e)}")
+        error_logger.error(f"API Call Error: {str(e)}")
         return f"Error: {str(e)}"
 
 def just_call_openai(discIn):
@@ -371,18 +536,19 @@ def post_to_twitter(content):
         for tweet in trimmed_tweets[1:]:
             time.sleep(2)  # Wait for 2 seconds between tweets
 
-            reply_tweet = twclient.create_tweet(text=tweet, in_reply_to_tweet_id=tweet_id)
-            tweet_id = reply_tweet.data['id']
-            logging.info("Reply tweet posted successfully.")
+            #reply_tweet = twclient.create_tweet(text=tweet, in_reply_to_tweet_id=tweet_id)
+            #tweet_id = reply_tweet.data['id']
+            reply_tweet = twclient.create_tweet(text=tweet)
+            logging.info("other tweet posted successfully.")
         logging.info("Tweet thread posted successfully!")
 
     except tweepy.errors.TooManyRequests as e:
         reset_time = e.response.headers.get('x-rate-limit-reset')
         reset_time_human = datetime.utcfromtimestamp(int(reset_time)).strftime('%Y-%m-%d %H:%M:%S')
-        logging.error(f"Rate limit exceeded.: ")
-        logging.error(f" Try again at           : {reset_time_human}")
-        logging.error(f" x-rate-limit-limit     : {e.response.headers.get('x-rate-limit-limit')}")
-        logging.error(f" x-rate-limit-remaining : {e.response.headers.get('x-rate-limit-remaining')}")
+        error_logger.error(f"Rate limit exceeded.: ")
+        error_logger.error(f" Try again at           : {reset_time_human}")
+        error_logger.error(f" x-rate-limit-limit     : {e.response.headers.get('x-rate-limit-limit')}")
+        error_logger.error(f" x-rate-limit-remaining : {e.response.headers.get('x-rate-limit-remaining')}")
         return
 
 def twtest():
