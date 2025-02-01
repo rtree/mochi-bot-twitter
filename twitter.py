@@ -5,6 +5,7 @@ from openai import OpenAI
 import tweepy
 import pandas as pd
 from datetime import datetime
+import requests
 
 # Twitter API Credentials (Replace with your own)
 
@@ -20,51 +21,56 @@ TWITTER_ACCESS_TOKEN  = os.getenv('TWITTER_ACCESS_TOKEN')
 TWITTER_ACCESS_SECRET = os.getenv('TWITTER_ACCESS_SECRET')
 TWITTER_BEARER_TOKEN  = os.getenv('TWITTER_BEARER_TOKEN')
 
+# Define headers for authentication
+HEADERS = {"Authorization": f"Bearer {TWITTER_BEARER_TOKEN}"}
 
-
-# Authenticate with Twitter API
-auth = tweepy.OAuth1UserHandler(TWITTER_API_KEY, TWITTER_API_SECRET, TWITTER_ACCESS_TOKEN, TWITTER_ACCESS_SECRET)
-api = tweepy.API(auth, wait_on_rate_limit=True)
-
-# Get trending topics (Worldwide WOEID = 1)
-worldwide_woeid = 1
-try:
-    trends = api.get_place_trends(worldwide_woeid)
-    trending_topics = [trend['name'] for trend in trends[0]['trends']]
-except tweepy.TweepError as e:
-    print(f"Error fetching trends: {e}")
-    trending_topics = []
-
-# Log file setup
+# Define log file
 log_file = f"twitter-trends-{datetime.now().strftime('%Y-%m-%d')}.log"
 
-# Function to fetch tweets for a given topic
+# Trending topics (Manually set tech & economy-related topics)
+trending_topics = ["Artificial Intelligence", "Crypto", "Stock Market", "Tech News", "Bitcoin", "Startup", "Elon Musk", "Finance"]
+
+# Function to fetch tweets for a topic
 def fetch_tweets(topic):
-    query = f"{topic} -is:retweet"
-    try:
-        tweets = api.search_tweets(q=query, count=100, tweet_mode='extended')
-        tweet_data = []
-        
-        for tweet in tweets:
-            tweet_info = {
-                'username': tweet.user.screen_name,
-                'content': tweet.full_text,
-                'likes': tweet.favorite_count,
-                'retweets': tweet.retweet_count,
-                'quotes': tweet.quote_count if hasattr(tweet, 'quote_count') else 0,
-                'created_at': tweet.created_at.strftime('%Y-%m-%d %H:%M:%S')
-            }
-            tweet_data.append(tweet_info)
-
-        return tweet_data
-
-    except e:
-        print(f"Error fetching tweets for {topic}: {e}")
+    url = "https://api.twitter.com/2/tweets/search/recent"
+    
+    # Search query: Exclude retweets, limit results
+    params = {
+        "query": f"{topic} -is:retweet lang:en",
+        "max_results": 100,
+        "tweet.fields": "created_at,public_metrics,text,author_id",
+        "expansions": "author_id",
+        "user.fields": "username"
+    }
+    
+    response = requests.get(url, headers=HEADERS, params=params)
+    
+    if response.status_code != 200:
+        print(f"Error fetching tweets for {topic}: {response.json()}")
         return []
+    
+    data = response.json()
+    tweets = data.get("data", [])
+    users = {user["id"]: user["username"] for user in data.get("includes", {}).get("users", [])}
+    
+    tweet_data = []
+    for tweet in tweets:
+        metrics = tweet["public_metrics"]
+        tweet_data.append({
+            "username": users.get(tweet["author_id"], "Unknown"),
+            "content": tweet["text"],
+            "likes": metrics["like_count"],
+            "retweets": metrics["retweet_count"],
+            "quotes": metrics.get("quote_count", 0),
+            "created_at": tweet["created_at"]
+        })
+    
+    return tweet_data
 
 # Fetch tweets for each trending topic and save to log file
 all_tweets = []
 for topic in trending_topics:
+    print(f"Fetching tweets for: {topic}")
     tweets = fetch_tweets(topic)
     all_tweets.extend(tweets)
 
@@ -77,5 +83,3 @@ if all_tweets:
     print(f"Data saved to {log_file}")
 else:
     print("No tweets found for the trending topics.")
-
-
