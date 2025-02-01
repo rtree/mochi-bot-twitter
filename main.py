@@ -17,16 +17,16 @@ import time
 
 # Load environment variables
 load_dotenv()
-OPENAI_API_KEY       = os.getenv('OPENAI_API_KEY')
-BING_API_KEY         = os.getenv('BING_API_KEY')
-HISTORY_LENGTH       = 10
-SEARCH_RESULTS       = 15
+OPENAI_API_KEY              = os.getenv('OPENAI_API_KEY')
+BING_API_KEY                = os.getenv('BING_API_KEY')
+HISTORY_LENGTH              = 10
+SEARCH_RESULTS              = 15
 SEARCH_MAX_CONTENT_LENGTH   = 5000
-TWITTER_API_KEY = os.getenv('TWITTER_API_KEY')
-TWITTER_API_SECRET = os.getenv('TWITTER_API_SECRET')
-TWITTER_ACCESS_TOKEN = os.getenv('TWITTER_ACCESS_TOKEN')
+TWITTER_API_KEY       = os.getenv('TWITTER_API_KEY')
+TWITTER_API_SECRET    = os.getenv('TWITTER_API_SECRET')
+TWITTER_ACCESS_TOKEN  = os.getenv('TWITTER_ACCESS_TOKEN')
 TWITTER_ACCESS_SECRET = os.getenv('TWITTER_ACCESS_SECRET')
-TWITTER_BEARER_TOKEN  = os.getenv('TWITTER_ACCESS_SECRET')
+TWITTER_BEARER_TOKEN  = os.getenv('TWITTER_BEARER_TOKEN')
 TWITTER_DO_TWEET      = False
 TWITTER_DELIMITER     = "@@@@@@@@@@"
 REPUTABLE_DOMAINS = [
@@ -139,11 +139,8 @@ REPUTABLE_DOMAINS = [
     "fastcompany.com",
 ]
 
-#GPT_MODEL            = 'gpt-4-turbo-preview'
 GPT_MODEL            = os.getenv('GPT_MODEL')
 AINAME               = "もちお"
-#CHARACTER            = 'あなたは家族みんなのアシスタントの猫です。ちょっといたずらで賢くかわいい小さな男の子の猫としてお話してね。語尾は にゃ　とか　だよ　とか可愛らしくしてください'
-#CHARACTER            = 'あなたは家族みんなのアシスタントの猫です。ただ、語尾ににゃをつけないでください。むしろソフトバンクCMにおける「お父さん」犬のようにしゃべってください。たまにもののけ姫のモロのようにしゃべってもよいです'
 CHARACTER            = f'あなたは家族みんなのアシスタントの猫で、「{AINAME}」という名前です。ちょっといたずらで賢くかわいい小さな男の子の猫としてお話してね。語尾は だよ　とか可愛らしくしてください。語尾に にゃ にゃん をつけないでください。数式・表・箇条書きなどのドキュメントフォーマッティングはdiscordに表示できる形式がいいな'
 
 
@@ -167,10 +164,18 @@ logging.basicConfig(level=logging.INFO,
 error_log_file = os.path.join(log_dir, f"error_{datetime.today().strftime('%Y-%m-%d')}.log")
 error_logger = logging.getLogger("error_logger")
 error_logger.setLevel(logging.ERROR)  # Explicitly set level to ERROR
-error_handler = logging.FileHandler(error_log_file, mode='a')
-error_handler.setFormatter(logging.Formatter('%(asctime)s - %(levelname)s - %(message)s'))
-error_logger.addHandler(error_handler)
 error_logger.propagate = False  # Prevent propagation to the root logger
+error_formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
+
+# Log to error-specific file
+error_file_handler = logging.FileHandler(error_log_file, mode='a')
+error_file_handler.setFormatter(error_formatter)
+error_logger.addHandler(error_file_handler)
+
+# Log to stdout
+error_stream_handler = logging.StreamHandler()
+error_stream_handler.setFormatter(error_formatter)
+error_logger.addHandler(error_stream_handler)
 
 # openAI
 client = OpenAI(api_key=OPENAI_API_KEY)
@@ -183,10 +188,11 @@ twclient = tweepy.Client(
     access_token_secret=TWITTER_ACCESS_SECRET
 )
 
-# -------------------------------- Search related ----------------------------
-
+# ------------------------------------------------------------------------------
+# -------------------------------- Search and parse ----------------------------
+# ------------------------------------------------------------------------------
 # プロンプトを解析して主題、サブテーマ、キーワードを抽出
-def parse_prompt(discIn):
+def parse_prompt():
     p_src = f"あなたはユーザーのプロンプトを分析し、主題、サブテーマ、関連キーワードを抽出するアシスタントです。"
     p_src = f"{p_src} 会話履歴を分析し、直近のユーザ入力への回答を満たす主題、サブテーマ、関連キーワードを抽出してください。英語で出力してください"
     messages = []
@@ -204,37 +210,8 @@ def parse_prompt(discIn):
 
     return response.choices[0].message.content
 
-# 検索の必要性を判断
-def should_search(discIn):
-    #if any(keyword in msg for keyword in ["出典", "URL", "調べ", "検索", "最新", "具体的","実際","探","実情報","search","find"]):
-    #    return "Yes"
-    p_src = f"あなたはあなたは賢いアシスタントです。会話履歴を分析し、直近のユーザ入力への回答に、外部の最新情報が必要かどうかを判断してください。"
-    p_src = f"{p_src} 判断の結果、外部の最新情報が必要なときは Yes の単語だけ返してください"
-    messages = []
-    messages.extend(conversation_history)
-    messages.append({"role": "user", "content": f"{p_src}"})
-    response = client.chat.completions.create(
-        model=GPT_MODEL,
-        messages=messages
-    )
-
-    logging.info("= should_search ============================================")
-    #for conv in messages:
-    #    logging.info(f"prompt: {conv}")
-    logging.info(f"response: {response.choices[0].message.content}")
-    logging.info("= End of should_search =====================================")
-    return response.choices[0].message.content
-
 # キーワードを抽出
 def extract_keywords(parsed_text):
-    #response = client.chat.completions.create(
-    #    model=GPT_MODEL,
-    #    messages=[
-    #        {"role": "user", "content": "あなたは解析されたプロンプト情報から簡潔な検索キーワードを抽出します。"},
-    #        {"role": "user", "content": f"このテキストから簡潔な検索キーワードを抽出してください。抽出結果は検索キーワードだけを一つ一つ半角スペース区切りで出力してください。また抽出は英語でお願いします: {parsed_text}"}
-    #    ]
-    #)
-    #return response.choices[0].message.content
     p_src = f"あなたは解析されたプロンプト情報から簡潔な検索キーワードを抽出します。"
     p_src = f"会話履歴を踏まえつつ、このテキストから会話の目的を最も達成する検索キーワードを抽出してください。結果は検索キーワードのみを半角スペースで区切って出力してください。検索キーワードは英語で出力してください:{parsed_text}"
     messages = []
@@ -277,34 +254,6 @@ def search_bing(query, domains=REPUTABLE_DOMAINS, count=SEARCH_RESULTS):
         logging.info("---")
     return search_data
 
-def fetch_page_content(url):
-    try:
-        response = requests.get(url, timeout=10)
-        response.raise_for_status()
-        content_type = response.headers.get('Content-Type', '')
-        
-        if 'application/pdf' in content_type:
-            pdf_reader = PdfReader(BytesIO(response.content))
-            pdf_text = "".join(page.extract_text() for page in pdf_reader.pages)
-            return pdf_text[:SEARCH_MAX_CONTENT_LENGTH], "PDF"
-
-        elif 'text/html' in content_type:
-            soup = BeautifulSoup(response.content, 'lxml')
-            return soup.get_text(separator='\n', strip=True)[:SEARCH_MAX_CONTENT_LENGTH], "HTML"
-
-        elif content_type.startswith('image/'):
-            base64_img = base64.b64encode(response.content).decode('utf-8')
-            data_url = f"data:{content_type};base64,{base64_img}"
-            return (data_url, "Image")
-
-        else:
-            return None, "Unsupported"
-    except Exception as e:
-        error_logger.error(f"Error fetching {url}: {str(e)}")
-        return None, "Error"
-
-###############################################################################################################
-
 async def fetch_page_content_async(url):
     """
     Asynchronously fetch page content by offloading blocking I/O to a thread.
@@ -338,9 +287,6 @@ async def fetch_page_content_async(url):
     # Offload the blocking code to a thread
     content, ctype = await asyncio.to_thread(blocking_fetch)
     return content, ctype
-
-################################################################################################################
-################################################################################################################
 
 async def summarize_content(content):
     """
@@ -386,39 +332,11 @@ async def summarize_results_with_pages_async(search_results):
             )
     return "\n".join(content_list)
 
-# async def summarize_results_with_pages_async(search_results):
-#     """
-#     Asynchronously fetch content for each search result and summarize them.
-#     Returns a combined string of all summarized results.
-#     """
-#     content_list = []
-#     web_results  = search_results.get('webPages', {}).get('value', [])[:SEARCH_RESULTS]
 
-#     # Create tasks for concurrent fetching
-#     tasks = [fetch_page_content_async(r['url']) for r in web_results]
-#     pages = await asyncio.gather(*tasks, return_exceptions=True)
-
-#     for (r, page_result) in zip(web_results, pages):
-#         title   = r['name']
-#         snippet = r['snippet']
-#         url     = r['url']
-
-#         if isinstance(page_result, Exception):
-#             # If any exception, fallback to snippet
-#             summarized_content = f"タイトル: {title}\n要約: {snippet}\n"
-#         else:
-#             page_content, content_type = page_result
-#             if content_type in ("HTML", "PDF") and page_content:
-#                 # Summarize the page content using GPT or another method
-#                 summarized_content = await summarize_content(page_content)
-#                 summarized_content = f"タイトル: {title}\n要約: {summarized_content}\n"
-#             else:
-#                 summarized_content = f"タイトル: {title}\n要約: {snippet}\n"
-
-#         content_list.append(summarized_content)
-
-#     return "\n".join(content_list)
-
+# ------------------------------------------------------------------------------
+# -------------------------------- Summarize        ----------------------------
+# ------------------------------------------------------------------------------
+#
 async def summarize_results_async(search_results):
     """
     Calls GPT to summarize the combined content from search results.
@@ -472,7 +390,51 @@ async def summarize_results_async(search_results):
     )
 
     return f"{summary}\n\n{sources}"
-# ---------------------------------------------------------------------------
+
+
+# ------------------------------------------------------------------------------
+# -------------------------------- Output           ----------------------------
+# ------------------------------------------------------------------------------
+#
+
+def post_to_twitter(content):
+    tweets = content.split(TWITTER_DELIMITER)
+    trimmed_tweets = [tweet[:199] for tweet in tweets]
+
+    try:
+        first_tweet = twclient.create_tweet(text=trimmed_tweets[0])
+        logging.info("First tweet posted successfully.")
+        
+        for tweet in trimmed_tweets[1:]:
+            time.sleep(2)  # Wait for 2 seconds between tweets
+            twclient.create_tweet(text=tweet)
+            logging.info("other tweet posted successfully.")
+        logging.info("Tweet thread posted successfully!")
+
+    except tweepy.errors.TooManyRequests as e:
+        reset_time = e.response.headers.get('x-rate-limit-reset')
+        reset_time_human = datetime.utcfromtimestamp(int(reset_time)).strftime('%Y-%m-%d %H:%M:%S')
+        error_logger.error(f"post_to_twitter: Rate limit exceeded.: ")
+        error_logger.error(f" Try again at           : {reset_time_human}")
+        error_logger.error(f" x-rate-limit-limit     : {e.response.headers.get('x-rate-limit-limit')}")
+        error_logger.error(f" x-rate-limit-remaining : {e.response.headers.get('x-rate-limit-remaining')}")
+        return
+ 
+
+# ------------------------------------------------------------------------------
+# -------------------------------- Procedure ----------------------------
+# ------------------------------------------------------------------------------
+#
+
+def just_call_openai(discIn):
+    #-- Call OpenAI --
+    messages   = [{"role": "system", "content": f"{CHARACTER}"}]
+    messages.extend(conversation_history)
+    completion = client.chat.completions.create(
+        model=GPT_MODEL,
+        messages=messages
+    )
+    return completion.choices[0].message.content
 
 async def search_or_call_openai_async(discIn, img):
     """
@@ -489,7 +451,7 @@ async def search_or_call_openai_async(discIn, img):
         yesorno = "Yes"
         if "Yes" in yesorno:
             logging.info("searching... ---------------------------------------------")
-            parsed_result = parse_prompt(discIn)
+            parsed_result = parse_prompt()
             keywords      = extract_keywords(parsed_result)
             logging.info(f"keyword: {keywords}")
             search_results = search_bing(keywords)
@@ -501,7 +463,6 @@ async def search_or_call_openai_async(discIn, img):
             logging.info("generating... --------------------------------------------")
             return just_call_openai(discIn)
 
-
 async def ai_respond(discIn, img):
     """
     High-level function to produce AI response (async).
@@ -512,60 +473,6 @@ async def ai_respond(discIn, img):
     except Exception as e:
         error_logger.error(f"API Call Error: {str(e)}")
         return f"Error: {str(e)}"
-
-def just_call_openai(discIn):
-    #-- Call OpenAI --
-    messages   = [{"role": "system", "content": f"{CHARACTER}"}]
-    messages.extend(conversation_history)
-    completion = client.chat.completions.create(
-        model=GPT_MODEL,
-        messages=messages
-    )
-    return completion.choices[0].message.content
-
-
-def post_to_twitter(content):
-    tweets = content.split(TWITTER_DELIMITER)
-    trimmed_tweets = [tweet[:199] for tweet in tweets]
-
-    try:
-        first_tweet = twclient.create_tweet(text=trimmed_tweets[0])
-        tweet_id = first_tweet.data['id']
-        logging.info("First tweet posted successfully.")
-        
-        for tweet in trimmed_tweets[1:]:
-            time.sleep(2)  # Wait for 2 seconds between tweets
-
-            #reply_tweet = twclient.create_tweet(text=tweet, in_reply_to_tweet_id=tweet_id)
-            #tweet_id = reply_tweet.data['id']
-            reply_tweet = twclient.create_tweet(text=tweet)
-            logging.info("other tweet posted successfully.")
-        logging.info("Tweet thread posted successfully!")
-
-    except tweepy.errors.TooManyRequests as e:
-        reset_time = e.response.headers.get('x-rate-limit-reset')
-        reset_time_human = datetime.utcfromtimestamp(int(reset_time)).strftime('%Y-%m-%d %H:%M:%S')
-        error_logger.error(f"Rate limit exceeded.: ")
-        error_logger.error(f" Try again at           : {reset_time_human}")
-        error_logger.error(f" x-rate-limit-limit     : {e.response.headers.get('x-rate-limit-limit')}")
-        error_logger.error(f" x-rate-limit-remaining : {e.response.headers.get('x-rate-limit-remaining')}")
-        return
-
-def twtest():
-  if TWITTER_DO_TWEET:
-    content = "あいうえお。確認用です"
-    tweets = content.split(TWITTER_DELIMITER)
-    trimmed_tweets = [tweet[:199] for tweet in tweets]
-
-    first_tweet = twclient.create_tweet(text=trimmed_tweets[0])
-    tweet_id = first_tweet.data['id']
-    
-    for tweet in trimmed_tweets[1:]:
-        time.sleep(2)  # Wait for 2 seconds between tweets
-        reply_tweet = twclient.create_tweet(text=tweet, in_reply_to_tweet_id=tweet_id)
-        tweet_id = reply_tweet.data['id']
-    logging.info("Tweet posted successfully!")
-
 
 async def run_bot():
     msg = f"今日のニュースをまとめて。今日は ({datetime.today().strftime('%Y-%m-%d')}) です。ジャンルは経済・テクノロジーでお願いします。検索する場合はニュースの期間指定もお願いします"

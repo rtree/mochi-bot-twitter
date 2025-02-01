@@ -8,3 +8,4 @@ lxml
 PyPDF2
 pycryptodome
 tweepy
+pandas
