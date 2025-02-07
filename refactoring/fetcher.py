@@ -31,7 +31,6 @@ class Fetcher:
 
         return "\n".join(content_list)
 
-
     async def fetch_bing(self, query, count=15):
         url = "https://api.bing.microsoft.com/v7.0/search"
         headers = {"Ocp-Apim-Subscription-Key": BING_API_KEY}
