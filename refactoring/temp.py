@@ -31,6 +31,59 @@ conversation_history = deque(maxlen=Config.HISTORY_LENGTH)
 
 class Fetcher:
     @staticmethod
+    async def fetch():
+        msg = f"今日のニュースをまとめて。今日は ({datetime.today().strftime('%Y-%m-%d')}) です。ジャンルは経済・テクノロジーでお願いします。検索する場合はニュースの期間指定もお願いします"
+        img_url = None
+        Config.logprint.info("-User input------------------------------------------------------------------")
+        Config.logprint.info(f"  Message content: '{msg}'")
+        discIn = []
+        discIn.append({"role": "user", "content": msg})
+        conversation_history.extend(discIn)
+
+        Config.logprint.info("searching... ---------------------------------------------")
+        parsed_result  = Fetcher.parse_prompt()
+        keywords       = Fetcher.extract_keywords(parsed_result)
+        Config.logprint.info(f"keyword: {keywords}")
+        search_results = Fetcher.search_bing(keywords)
+        search_results = await Aggregator.summarize_results_with_pages_async(search_results)
+
+        return search_results
+
+    @staticmethod
+    def parse_prompt():
+        p_src = f"あなたはユーザーのプロンプトを分析し、主題、サブテーマ、関連キーワードを抽出するアシスタントです。"
+        p_src = f"{p_src} 会話履歴を分析し、直近のユーザ入力への回答を満たす主題、サブテーマ、関連キーワードを抽出してください。英語で出力してください"
+        messages = []
+        messages.extend(conversation_history)
+        messages.append({"role": "user", "content": f"{p_src}"})
+        response = client.chat.completions.create(
+            model=Config.GPT_MODEL,
+            messages=messages
+        )
+        Config.logprint.info("= parse_prompt ============================================")
+        Config.logprint.info(f"response: {response.choices[0].message.content}")
+        Config.logprint.info("= End of parse_prompt =====================================")
+
+        return response.choices[0].message.content
+
+    @staticmethod
+    def extract_keywords(parsed_text):
+        p_src = f"あなたは解析されたプロンプト情報から簡潔な検索キーワードを抽出します。"
+        p_src = f"会話履歴を踏まえつつ、このテキストから会話の目的を最も達成する検索キーワードを抽出してください。結果は検索キーワードのみを半角スペースで区切って出力してください。検索キーワードは英語で出力してください:{parsed_text}"
+        messages = []
+        messages.extend(conversation_history)
+        messages.append({"role": "user", "content": f"{p_src}"})
+        response = client.chat.completions.create(
+            model=Config.GPT_MODEL,
+            messages=messages
+        )
+        Config.logprint.info("= extract_keywords ============================================")
+        Config.logprint.info(f"response: {response.choices[0].message.content}")
+        Config.logprint.info("= End of extract_keywords =====================================")
+
+        return response.choices[0].message.content
+
+    @staticmethod
     def search_bing(query, count=Config.SEARCH_RESULTS):
         url = "https://api.bing.microsoft.com/v7.0/search"
         headers = {"Ocp-Apim-Subscription-Key": Config.BING_API_KEY}
@@ -104,55 +157,7 @@ class Aggregator:
 
 class Processor:
     @staticmethod
-    def parse_prompt():
-        p_src = f"あなたはユーザーのプロンプトを分析し、主題、サブテーマ、関連キーワードを抽出するアシスタントです。"
-        p_src = f"{p_src} 会話履歴を分析し、直近のユーザ入力への回答を満たす主題、サブテーマ、関連キーワードを抽出してください。英語で出力してください"
-        messages = []
-        messages.extend(conversation_history)
-        messages.append({"role": "user", "content": f"{p_src}"})
-        response = client.chat.completions.create(
-            model=Config.GPT_MODEL,
-            messages=messages
-        )
-        Config.logprint.info("= parse_prompt ============================================")
-        Config.logprint.info(f"response: {response.choices[0].message.content}")
-        Config.logprint.info("= End of parse_prompt =====================================")
-
-        return response.choices[0].message.content
-
-    @staticmethod
-    def extract_keywords(parsed_text):
-        p_src = f"あなたは解析されたプロンプト情報から簡潔な検索キーワードを抽出します。"
-        p_src = f"会話履歴を踏まえつつ、このテキストから会話の目的を最も達成する検索キーワードを抽出してください。結果は検索キーワードのみを半角スペースで区切って出力してください。検索キーワードは英語で出力してください:{parsed_text}"
-        messages = []
-        messages.extend(conversation_history)
-        messages.append({"role": "user", "content": f"{p_src}"})
-        response = client.chat.completions.create(
-            model=Config.GPT_MODEL,
-            messages=messages
-        )
-        Config.logprint.info("= extract_keywords ============================================")
-        Config.logprint.info(f"response: {response.choices[0].message.content}")
-        Config.logprint.info("= End of extract_keywords =====================================")
-
-        return response.choices[0].message.content
-
-    @staticmethod
-    async def summarize_content(content):
-        def blocking_summary():
-            return client.chat.completions.create(
-                model=Config.GPT_MODEL,
-                messages=[
-                    {"role": "system", "content": "You are a summarization assistant."},
-                    {"role": "user", "content": f"Please summarize the following content:\n{content}"}
-                ]
-            ).choices[0].message.content
-
-        return await asyncio.to_thread(blocking_summary)
-
-    @staticmethod
-    async def summarize_results_async(search_results):
-        snippets = await Aggregator.summarize_results_with_pages_async(search_results)
+    async def summarize_results_async(snippets):
         p_src = (
             f"{Config.CHARACTER}。あなたは検索結果を要約し、調査報告として回答を作成します。"
             f" 会話履歴を踏まえつつ私が知りたいことの主旨を把握の上で、検索結果を要約し回答を作ってください。"
@@ -185,14 +190,7 @@ class Processor:
         response = await asyncio.to_thread(blocking_chat_completion)
         summary = response.choices[0].message.content
 
-        titles = search_results.get('titles', [])
-        urls = search_results.get('urls', [])
-        sources = "\n".join(
-            f"Source: {t} - {u}"
-            for t, u in zip(titles, urls)
-        )
-
-        return f"{summary}\n\n{sources}"
+        return f"{summary}"
 
 
 class Dispatcher:
@@ -220,46 +218,30 @@ class Dispatcher:
             Config.elogprint.error(f" x-rate-limit-remaining : {e.response.headers.get('x-rate-limit-remaining')}")
             return
 
-
-async def ai_respond(discIn, img):
+async def run_bot():
     try:
-        if img or any("http" in entry["content"] for entry in discIn):
-            Config.logprint.info("Skipping search and calling OpenAI directly.")
-            return Processor.just_call_openai(discIn)
-        else:
-            yesorno = "Yes"
-            if "Yes" in yesorno:
-                Config.logprint.info("searching... ---------------------------------------------")
-                parsed_result = Processor.parse_prompt()
-                keywords = Processor.extract_keywords(parsed_result)
-                Config.logprint.info(f"keyword: {keywords}")
-                search_results = Fetcher.search_bing(keywords)
-                summary = await Processor.summarize_results_async(search_results)
-                return summary
-            else:
-                Config.logprint.info("generating... --------------------------------------------")
-                return Processor.just_call_openai(discIn)
+        search_results = await Fetcher.fetch()  # Fix discrepancy by awaiting the fetch call
+        summary = await Processor.summarize_results_async(search_results)
+
+        # titles = search_results.get('titles', [])
+        # urls = search_results.get('urls', [])
+        # sources = "\n".join(
+        #     f"Source: {t} - {u}"
+        #     for t, u in zip(titles, urls)
+        # )
+        # summary = f"{summary}\n\n{sources}"
+        # Config.logprint.info(f"Summary: {summary}")
+
+        conversation_history.append({"role": "assistant", "content": summary})
+        Config.logprint.info("-Agent summary--------------------------------------------------------------")
+        Config.logprint.info(f"  Response content:'{summary}'")
+
+        if Config.TWITTER_DO_TWEET:
+            Dispatcher.post_to_twitter(summary)
+
     except Exception as e:
         Config.elogprint.error(f"API Call Error: {str(e)}")
         return f"Error: {str(e)}"
-
-
-async def run_bot():
-    msg = f"今日のニュースをまとめて。今日は ({datetime.today().strftime('%Y-%m-%d')}) です。ジャンルは経済・テクノロジーでお願いします。検索する場合はニュースの期間指定もお願いします"
-    img_url = None
-    Config.logprint.info("-User input------------------------------------------------------------------")
-    Config.logprint.info(f"  Message content: '{msg}'")
-    discIn = []
-    discIn.append({"role": "user", "content": msg})
-    conversation_history.extend(discIn)
-
-    response = await ai_respond(discIn, img_url)
-    conversation_history.append({"role": "assistant", "content": response})
-    Config.logprint.info("-Agent response--------------------------------------------------------------")
-    Config.logprint.info(f"  Response content:'{response}'")
-
-    if Config.TWITTER_DO_TWEET:
-        Dispatcher.post_to_twitter(response)
 
 
 if __name__ == "__main__":
