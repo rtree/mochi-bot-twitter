@@ -48,7 +48,7 @@ error_log_file = os.path.join(log_dir, f"error_{datetime.today().strftime('%Y-%m
 error_logger = logging.getLogger("error_logger")
 error_logger.setLevel(logging.ERROR)
 error_logger.propagate = False
-error_formatter = logging.Formatter('%(asctime)s - %(levellevel)s - %(message)s')
+error_formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
 
 error_file_handler = logging.FileHandler(error_log_file, mode='a')
 error_file_handler.setFormatter(error_formatter)
