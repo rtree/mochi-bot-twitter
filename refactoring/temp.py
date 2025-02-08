@@ -70,7 +70,7 @@ class Fetcher:
         messages.extend(self.context)
         messages.append({"role": "user", "content": f"{p_src}"})
         response = client.chat.completions.create(
-            model=Config.GPT_MODEL,
+            model=Config.OPENAI_GPT_MODEL,
             messages=messages
         )
         Config.logprint.info("= extract_keywords ============================================")
@@ -175,7 +175,7 @@ class Processor:
             messages.append({"role": "user", "content": p_src})
 
             return client.chat.completions.create(
-                model=Config.GPT_MODEL,
+                model=Config.OPENAI_GPT_MODEL,
                 messages=messages
             )
 
