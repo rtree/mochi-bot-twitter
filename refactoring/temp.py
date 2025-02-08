@@ -30,31 +30,32 @@ conversation_history = deque(maxlen=Config.HISTORY_LENGTH)
 
 
 class Fetcher:
-    @staticmethod
-    async def fetch():
+    def __init__(self):
+        self.conversation_history = deque(maxlen=Config.HISTORY_LENGTH)
+
+    async def fetch(self):
         msg = f"今日のニュースをまとめて。今日は ({datetime.today().strftime('%Y-%m-%d')}) です。ジャンルは経済・テクノロジーでお願いします。検索する場合はニュースの期間指定もお願いします"
         img_url = None
         Config.logprint.info("-User input------------------------------------------------------------------")
         Config.logprint.info(f"  Message content: '{msg}'")
         discIn = []
         discIn.append({"role": "user", "content": msg})
-        conversation_history.extend(discIn)
+        self.conversation_history.extend(discIn)
 
         Config.logprint.info("searching... ---------------------------------------------")
-        parsed_result  = Fetcher.parse_prompt()
-        keywords       = Fetcher.extract_keywords(parsed_result)
+        parsed_result  = self.parse_prompt()
+        keywords       = self.extract_keywords(parsed_result)
         Config.logprint.info(f"keyword: {keywords}")
-        search_results = Fetcher.search_bing(keywords)
-        search_results = await Aggregator.summarize_results_with_pages_async(search_results)
+        search_results = self.search_bing(keywords)
+        search_results = await self.summarize_results_with_pages_async(search_results)
 
         return search_results
 
-    @staticmethod
-    def parse_prompt():
+    def parse_prompt(self):
         p_src = f"あなたはユーザーのプロンプトを分析し、主題、サブテーマ、関連キーワードを抽出するアシスタントです。"
         p_src = f"{p_src} 会話履歴を分析し、直近のユーザ入力への回答を満たす主題、サブテーマ、関連キーワードを抽出してください。英語で出力してください"
         messages = []
-        messages.extend(conversation_history)
+        messages.extend(self.conversation_history)
         messages.append({"role": "user", "content": f"{p_src}"})
         response = client.chat.completions.create(
             model=Config.GPT_MODEL,
@@ -66,12 +67,11 @@ class Fetcher:
 
         return response.choices[0].message.content
 
-    @staticmethod
-    def extract_keywords(parsed_text):
+    def extract_keywords(self, parsed_text):
         p_src = f"あなたは解析されたプロンプト情報から簡潔な検索キーワードを抽出します。"
         p_src = f"会話履歴を踏まえつつ、このテキストから会話の目的を最も達成する検索キーワードを抽出してください。結果は検索キーワードのみを半角スペースで区切って出力してください。検索キーワードは英語で出力してください:{parsed_text}"
         messages = []
-        messages.extend(conversation_history)
+        messages.extend(self.conversation_history)
         messages.append({"role": "user", "content": f"{p_src}"})
         response = client.chat.completions.create(
             model=Config.GPT_MODEL,
@@ -83,8 +83,7 @@ class Fetcher:
 
         return response.choices[0].message.content
 
-    @staticmethod
-    def search_bing(query, count=Config.SEARCH_RESULTS):
+    def search_bing(self, query, count=Config.SEARCH_RESULTS):
         url = "https://api.bing.microsoft.com/v7.0/search"
         headers = {"Ocp-Apim-Subscription-Key": Config.BING_API_KEY}
         params = {"q": query, "count": count, "setLang": "en", "mkt": "ja-JP", "freshness": "Week"}
@@ -102,8 +101,7 @@ class Fetcher:
             Config.logprint.info("---")
         return search_data
 
-    @staticmethod
-    async def fetch_page_content_async(url):
+    async def fetch_page_content_async(self, url):
         def blocking_fetch():
             try:
                 response = requests.get(url, timeout=10)
@@ -131,14 +129,11 @@ class Fetcher:
 
         content, ctype = await asyncio.to_thread(blocking_fetch)
         return content, ctype
-
-
-class Aggregator:
-    @staticmethod
-    async def summarize_results_with_pages_async(search_results):
+    
+    async def summarize_results_with_pages_async(self, search_results):
         content_list = []
         web_results = search_results.get('webPages', {}).get('value', [])[:Config.SEARCH_RESULTS]
-        tasks = [Fetcher.fetch_page_content_async(r['url']) for r in web_results]
+        tasks = [self.fetch_page_content_async(r['url']) for r in web_results]
         pages = await asyncio.gather(*tasks, return_exceptions=True)
         for (r, page_result) in zip(web_results, pages):
             title = r['name']
@@ -155,9 +150,12 @@ class Aggregator:
         return "\n".join(content_list)
 
 
+
 class Processor:
-    @staticmethod
-    async def summarize_results_async(snippets):
+    def __init__(self):
+        self.conversation_history = deque(maxlen=Config.HISTORY_LENGTH)
+
+    async def summarize_results_async(self, snippets):
         p_src = (
             f"{Config.CHARACTER}。あなたは検索結果を要約し、調査報告として回答を作成します。"
             f" 会話履歴を踏まえつつ私が知りたいことの主旨を把握の上で、検索結果を要約し回答を作ってください。"
@@ -179,7 +177,7 @@ class Processor:
 
         def blocking_chat_completion():
             messages = [{"role": "system", "content": Config.CHARACTER}]
-            messages.extend(conversation_history)
+            messages.extend(self.conversation_history)
             messages.append({"role": "user", "content": p_src})
 
             return client.chat.completions.create(
@@ -194,18 +192,26 @@ class Processor:
 
 
 class Dispatcher:
-    @staticmethod
-    def post_to_twitter(content):
+    def __init__(self):
+        self.twclient = tweepy.Client(
+            bearer_token=Config.TWITTER_BEARER_TOKEN,
+            consumer_key=Config.TWITTER_API_KEY,
+            consumer_secret=Config.TWITTER_API_SECRET,
+            access_token=Config.TWITTER_ACCESS_TOKEN,
+            access_token_secret=Config.TWITTER_ACCESS_SECRET
+        )
+
+    def post_to_twitter(self, content):
         tweets = content.split(Config.TWITTER_DELIMITER)
         trimmed_tweets = [tweet[:199] for tweet in tweets]
 
         try:
-            first_tweet = twclient.create_tweet(text=trimmed_tweets[0])
+            first_tweet = self.twclient.create_tweet(text=trimmed_tweets[0])
             Config.logprint.info("First tweet posted successfully.")
 
             for tweet in trimmed_tweets[1:]:
                 time.sleep(2)
-                twclient.create_tweet(text=tweet)
+                self.twclient.create_tweet(text=tweet)
                 Config.logprint.info("Other tweet posted successfully.")
             Config.logprint.info("Tweet thread posted successfully!")
 
@@ -220,24 +226,18 @@ class Dispatcher:
 
 async def run_bot():
     try:
-        search_results = await Fetcher.fetch()  # Fix discrepancy by awaiting the fetch call
-        summary = await Processor.summarize_results_async(search_results)
-
-        # titles = search_results.get('titles', [])
-        # urls = search_results.get('urls', [])
-        # sources = "\n".join(
-        #     f"Source: {t} - {u}"
-        #     for t, u in zip(titles, urls)
-        # )
-        # summary = f"{summary}\n\n{sources}"
-        # Config.logprint.info(f"Summary: {summary}")
+        fetcher = Fetcher()  # Instantiate Fetcher
+        search_results = await fetcher.fetch()  # Call instance method
+        processor = Processor()  # Instantiate Processor
+        summary = await processor.summarize_results_async(search_results)
 
         conversation_history.append({"role": "assistant", "content": summary})
         Config.logprint.info("-Agent summary--------------------------------------------------------------")
         Config.logprint.info(f"  Response content:'{summary}'")
 
         if Config.TWITTER_DO_TWEET:
-            Dispatcher.post_to_twitter(summary)
+            dispatcher = Dispatcher()  # Instantiate Dispatcher
+            dispatcher.post_to_twitter(summary)
 
     except Exception as e:
         Config.elogprint.error(f"API Call Error: {str(e)}")
