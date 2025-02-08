@@ -8,7 +8,7 @@ load_dotenv()
 
 class Config:
     OPENAI_API_KEY        = os.getenv('OPENAI_API_KEY')
-    OPENAI_GPT_MODEL      = os.getenv('GPT_MODEL')
+    OPENAI_GPT_MODEL      = os.getenv('OPENAI_GPT_MODEL')
     OPENAI_HISTORY_LENGTH = 10
 
     BING_API_KEY          = os.getenv('BING_API_KEY')
