@@ -7,19 +7,21 @@ from datetime import datetime
 load_dotenv()
 
 class Config:
-    OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')
-    BING_API_KEY = os.getenv('BING_API_KEY')
-    HISTORY_LENGTH = 10
-    SEARCH_RESULTS = 15
-    SEARCH_MAX_CONTENT_LENGTH = 5000
-    TWITTER_API_KEY = os.getenv('TWITTER_API_KEY')
-    TWITTER_API_SECRET = os.getenv('TWITTER_API_SECRET')
-    TWITTER_ACCESS_TOKEN = os.getenv('TWITTER_ACCESS_TOKEN')
+    OPENAI_API_KEY        = os.getenv('OPENAI_API_KEY')
+    OPENAI_GPT_MODEL      = os.getenv('GPT_MODEL')
+    OPENAI_HISTORY_LENGTH = 10
+
+    BING_API_KEY          = os.getenv('BING_API_KEY')
+    BING_SEARCH_RESULTS   = 15
+    BING_SEARCH_MAX_CONTENT_LENGTH = 5000
+
+    TWITTER_API_KEY       = os.getenv('TWITTER_API_KEY')
+    TWITTER_API_SECRET    = os.getenv('TWITTER_API_SECRET')
+    TWITTER_ACCESS_TOKEN  = os.getenv('TWITTER_ACCESS_TOKEN')
     TWITTER_ACCESS_SECRET = os.getenv('TWITTER_ACCESS_SECRET')
-    TWITTER_BEARER_TOKEN = os.getenv('TWITTER_BEARER_TOKEN')
-    TWITTER_DO_TWEET = False
-    TWITTER_DELIMITER = "@@@@@@@@@@"
-    GPT_MODEL = os.getenv('GPT_MODEL')
+    TWITTER_BEARER_TOKEN  = os.getenv('TWITTER_BEARER_TOKEN')
+    TWITTER_DO_TWEET      = False
+    TWITTER_DELIMITER     = "@@@@@@@@@@"
     AINAME = "もちお"
     CHARACTER = f'あなたは家族みんなのアシスタントの猫で、「{AINAME}」という名前です。ちょっといたずらで賢くかわいい小さな男の子の猫としてお話してね。語尾は だよ　とか可愛らしくしてください。語尾に にゃ にゃん をつけないでください。数式・表・箇条書きなどのドキュメントフォーマッティングはdiscordに表示できる形式がいいな'
 
