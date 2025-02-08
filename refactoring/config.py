@@ -33,6 +33,7 @@ class Config:
                             logging.FileHandler(log_file, mode='a'),
                             logging.StreamHandler()
                         ])
+    logging = logging.getLogger()
 
     error_log_file = os.path.join(log_dir, f"error_{datetime.today().strftime('%Y-%m-%d')}.log")
     error_logger = logging.getLogger("error_logger")
