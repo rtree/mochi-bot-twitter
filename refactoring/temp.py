@@ -41,12 +41,12 @@ class Fetcher:
         search_data = response.json()
         search_data['urls'] = [result['url'] for result in search_data.get('webPages', {}).get('value', [])[:Config.SEARCH_RESULTS]]
 
-        Config.logging.info("Bing Search Results:")
+        Config.logprint.info("Bing Search Results:")
         for result in search_data.get('webPages', {}).get('value', [])[:count]:
-            Config.logging.info(f"Title: {result['name']}")
-            Config.logging.info(f"URL: {result['url']}")
-            Config.logging.info(f"Snippet: {result['snippet']}")
-            Config.logging.info("---")
+            Config.logprint.info(f"Title: {result['name']}")
+            Config.logprint.info(f"URL: {result['url']}")
+            Config.logprint.info(f"Snippet: {result['snippet']}")
+            Config.logprint.info("---")
         return search_data
 
     @staticmethod
@@ -73,7 +73,7 @@ class Fetcher:
                     return None, "Unsupported"
 
             except Exception as e:
-                Config.error_logger.error(f"Error fetching {url}: {str(e)}")
+                Config.elogprint.error(f"Error fetching {url}: {str(e)}")
                 return None, "Error"
 
         content, ctype = await asyncio.to_thread(blocking_fetch)
@@ -114,9 +114,9 @@ class Processor:
             model=Config.GPT_MODEL,
             messages=messages
         )
-        Config.logging.info("= parse_prompt ============================================")
-        Config.logging.info(f"response: {response.choices[0].message.content}")
-        Config.logging.info("= End of parse_prompt =====================================")
+        Config.logprint.info("= parse_prompt ============================================")
+        Config.logprint.info(f"response: {response.choices[0].message.content}")
+        Config.logprint.info("= End of parse_prompt =====================================")
 
         return response.choices[0].message.content
 
@@ -131,9 +131,9 @@ class Processor:
             model=Config.GPT_MODEL,
             messages=messages
         )
-        Config.logging.info("= extract_keywords ============================================")
-        Config.logging.info(f"response: {response.choices[0].message.content}")
-        Config.logging.info("= End of extract_keywords =====================================")
+        Config.logprint.info("= extract_keywords ============================================")
+        Config.logprint.info(f"response: {response.choices[0].message.content}")
+        Config.logprint.info("= End of extract_keywords =====================================")
 
         return response.choices[0].message.content
 
@@ -203,60 +203,60 @@ class Dispatcher:
 
         try:
             first_tweet = twclient.create_tweet(text=trimmed_tweets[0])
-            Config.logging.info("First tweet posted successfully.")
+            Config.logprint.info("First tweet posted successfully.")
 
             for tweet in trimmed_tweets[1:]:
                 time.sleep(2)
                 twclient.create_tweet(text=tweet)
-                Config.logging.info("Other tweet posted successfully.")
-            Config.logging.info("Tweet thread posted successfully!")
+                Config.logprint.info("Other tweet posted successfully.")
+            Config.logprint.info("Tweet thread posted successfully!")
 
         except tweepy.errors.TooManyRequests as e:
             reset_time = e.response.headers.get('x-rate-limit-reset')
             reset_time_human = datetime.utcfromtimestamp(int(reset_time)).strftime('%Y-%m-%d %H:%M:%S')
-            Config.error_logger.error(f"post_to_twitter: Rate limit exceeded.: ")
-            Config.error_logger.error(f" Try again at           : {reset_time_human}")
-            Config.error_logger.error(f" x-rate-limit-limit     : {e.response.headers.get('x-rate-limit-limit')}")
-            Config.error_logger.error(f" x-rate-limit-remaining : {e.response.headers.get('x-rate-limit-remaining')}")
+            Config.elogprint.error(f"post_to_twitter: Rate limit exceeded.: ")
+            Config.elogprint.error(f" Try again at           : {reset_time_human}")
+            Config.elogprint.error(f" x-rate-limit-limit     : {e.response.headers.get('x-rate-limit-limit')}")
+            Config.elogprint.error(f" x-rate-limit-remaining : {e.response.headers.get('x-rate-limit-remaining')}")
             return
 
 
 async def ai_respond(discIn, img):
     try:
         if img or any("http" in entry["content"] for entry in discIn):
-            Config.logging.info("Skipping search and calling OpenAI directly.")
+            Config.logprint.info("Skipping search and calling OpenAI directly.")
             return Processor.just_call_openai(discIn)
         else:
             yesorno = "Yes"
             if "Yes" in yesorno:
-                Config.logging.info("searching... ---------------------------------------------")
+                Config.logprint.info("searching... ---------------------------------------------")
                 parsed_result = Processor.parse_prompt()
                 keywords = Processor.extract_keywords(parsed_result)
-                Config.logging.info(f"keyword: {keywords}")
+                Config.logprint.info(f"keyword: {keywords}")
                 search_results = Fetcher.search_bing(keywords)
                 summary = await Processor.summarize_results_async(search_results)
                 return summary
             else:
-                Config.logging.info("generating... --------------------------------------------")
+                Config.logprint.info("generating... --------------------------------------------")
                 return Processor.just_call_openai(discIn)
     except Exception as e:
-        Config.error_logger.error(f"API Call Error: {str(e)}")
+        Config.elogprint.error(f"API Call Error: {str(e)}")
         return f"Error: {str(e)}"
 
 
 async def run_bot():
     msg = f"今日のニュースをまとめて。今日は ({datetime.today().strftime('%Y-%m-%d')}) です。ジャンルは経済・テクノロジーでお願いします。検索する場合はニュースの期間指定もお願いします"
     img_url = None
-    Config.logging.info("-User input------------------------------------------------------------------")
-    Config.logging.info(f"  Message content: '{msg}'")
+    Config.logprint.info("-User input------------------------------------------------------------------")
+    Config.logprint.info(f"  Message content: '{msg}'")
     discIn = []
     discIn.append({"role": "user", "content": msg})
     conversation_history.extend(discIn)
 
     response = await ai_respond(discIn, img_url)
     conversation_history.append({"role": "assistant", "content": response})
-    Config.logging.info("-Agent response--------------------------------------------------------------")
-    Config.logging.info(f"  Response content:'{response}'")
+    Config.logprint.info("-Agent response--------------------------------------------------------------")
+    Config.logprint.info(f"  Response content:'{response}'")
 
     if Config.TWITTER_DO_TWEET:
         Dispatcher.post_to_twitter(response)

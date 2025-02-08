@@ -33,18 +33,18 @@ class Config:
                             logging.FileHandler(log_file, mode='a'),
                             logging.StreamHandler()
                         ])
-    logging = logging.getLogger()
+    logprint = logging.getLogger()
 
     error_log_file = os.path.join(log_dir, f"error_{datetime.today().strftime('%Y-%m-%d')}.log")
-    error_logger = logging.getLogger("error_logger")
-    error_logger.setLevel(logging.ERROR)
-    error_logger.propagate = False
+    elogprint = logging.getLogger("error_logger")
+    elogprint.setLevel(logging.ERROR)
+    elogprint.propagate = False
     error_formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
 
     error_file_handler = logging.FileHandler(error_log_file, mode='a')
     error_file_handler.setFormatter(error_formatter)
-    error_logger.addHandler(error_file_handler)
+    elogprint.addHandler(error_file_handler)
 
     error_stream_handler = logging.StreamHandler()
     error_stream_handler.setFormatter(error_formatter)
-    error_logger.addHandler(error_stream_handler)
+    elogprint.addHandler(error_stream_handler)
