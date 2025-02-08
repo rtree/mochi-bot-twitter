@@ -12,7 +12,7 @@ class Config:
     OPENAI_HISTORY_LENGTH = 10
 
     BING_API_KEY          = os.getenv('BING_API_KEY')
-    BING_SEARCH_RESULTS   = 15
+    BING_SEARCH_RESULTS   = 5
     BING_SEARCH_MAX_CONTENT_LENGTH = 5000
 
     TWITTER_API_KEY       = os.getenv('TWITTER_API_KEY')

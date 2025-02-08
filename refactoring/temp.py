@@ -10,8 +10,8 @@ from PyPDF2 import PdfReader
 from io import BytesIO
 import base64
 import sys
-import time
 from config import Config
+from workers.dispatcher import Dispatcher
 
 # Initialize OpenAI and Twitter clients
 client = OpenAI(api_key=Config.OPENAI_API_KEY)
@@ -23,7 +23,7 @@ twclient = tweepy.Client(
     access_token_secret=Config.TWITTER_ACCESS_SECRET
 )
 
-class Fetcher:
+class BingFetcher:
     def __init__(self, context, config):
         self.context = context
         self.config = config
@@ -269,51 +269,22 @@ class Processor:
         return f"{summary}"
 
 
-class Dispatcher:
-    def __init__(self, config):
-        self.config = config
-        self.twclient = tweepy.Client(
-            bearer_token=config.TWITTER_BEARER_TOKEN,
-            consumer_key=config.TWITTER_API_KEY,
-            consumer_secret=config.TWITTER_API_SECRET,
-            access_token=config.TWITTER_ACCESS_TOKEN,
-            access_token_secret=config.TWITTER_ACCESS_SECRET
-        )
-
-    def post_to_twitter(self, content):
-        tweets = content.split(self.config.TWITTER_DELIMITER)
-        trimmed_tweets = [tweet[:199] for tweet in tweets]
-
-        try:
-            first_tweet = self.twclient.create_tweet(text=trimmed_tweets[0])
-            self.config.logprint.info("First tweet posted successfully.")
-
-            for tweet in trimmed_tweets[1:]:
-                time.sleep(2)
-                self.twclient.create_tweet(text=tweet)
-                self.config.logprint.info("Other tweet posted successfully.")
-            self.config.logprint.info("Tweet thread posted successfully!")
-
-        except tweepy.errors.TooManyRequests as e:
-            reset_time = e.response.headers.get('x-rate-limit-reset')
-            reset_time_human = datetime.utcfromtimestamp(int(reset_time)).strftime('%Y-%m-%d %H:%M:%S')
-            self.config.elogprint.error(f"post_to_twitter: Rate limit exceeded.: ")
-            self.config.elogprint.error(f" Try again at           : {reset_time_human}")
-            self.config.elogprint.error(f" x-rate-limit-limit     : {e.response.headers.get('x-rate-limit-limit')}")
-            self.config.elogprint.error(f" x-rate-limit-remaining : {e.response.headers.get('x-rate-limit-remaining')}")
-            return
 
 async def run_bot():
     try:
         config = Config()  # Instantiate Config
         context = deque(maxlen=config.OPENAI_HISTORY_LENGTH)  # Instantiate context
-        fetcher = Fetcher(context, config)  # Instantiate Fetcher with context and config
-        reddit_fetcher = RedditFetcher(context, config)  # Instantiate RedditFetcher with context and config
+        fetchers = [BingFetcher(context, config),
+                    #RedditFetcher(context, config),
+                  ]
 
-        search_results_bing = await fetcher.fetch()  # Call instance method for Bing
-        search_results_reddit = await reddit_fetcher.fetch()  # Call instance method for Reddit
-
-        combined_search_results = search_results_bing + "\n" + search_results_reddit  # Combine search results
+        combined_search_results = ""
+        for fetcher in fetchers:
+            try:
+                search_results = await fetcher.fetch()
+                combined_search_results += search_results + "\n\n"
+            except Exception as e:
+                config.elogprint.error(f"Error in fetcher {fetcher.__class__.__name__}: {str(e)}")
 
         processor = Processor(context, config)  # Instantiate Processor with context and config
         summary = await processor.summarize_results_async(combined_search_results)
