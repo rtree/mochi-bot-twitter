@@ -104,6 +104,35 @@ class RedditFetcher:
 
         return "\n".join(content_list)
 
+    async def _fetch_page_content_async(self, url):
+        def blocking_fetch():
+            try:
+                response = requests.get(url, timeout=10)
+                response.raise_for_status()
+                content_type = response.headers.get('Content-Type', '')
+
+                if 'application/pdf' in content_type:
+                    pdf_reader = PdfReader(BytesIO(response.content))
+                    pdf_text = "".join(page.extract_text() for page in pdf_reader.pages)
+                    return pdf_text[:self.config.BING_SEARCH_MAX_CONTENT_LENGTH], "PDF"
+                elif 'text/html' in content_type:
+                    soup = BeautifulSoup(response.content, 'lxml')
+                    text = soup.get_text(separator='\n', strip=True)
+                    return text[:self.config.BING_SEARCH_MAX_CONTENT_LENGTH], "HTML"
+                elif content_type.startswith('image/'):
+                    base64_img = base64.b64encode(response.content).decode('utf-8')
+                    data_url = f"data:{content_type};base64,{base64_img}"
+                    return data_url, "Image"
+                else:
+                    return None, "Unsupported"
+
+            except Exception as e:
+                self.config.elogprint.error(f"Error fetching {url}: {str(e)}")
+                return None, "Error"
+
+        content, ctype = await asyncio.to_thread(blocking_fetch)
+        return content, ctype
+
     async def _summarize_text(self, text):
         """ Uses AI to summarize text asynchronously. """
         try:
