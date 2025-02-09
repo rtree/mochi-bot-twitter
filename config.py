@@ -12,7 +12,7 @@ class Config:
     OPENAI_HISTORY_LENGTH = 10
 
     BING_API_KEY          = os.getenv('BING_API_KEY')
-    BING_SEARCH_RESULTS   = 10
+    BING_SEARCH_RESULTS   = 5
     BING_SEARCH_MAX_CONTENT_LENGTH = 5000
 
     TWITTER_API_KEY       = os.getenv('TWITTER_API_KEY')
@@ -27,7 +27,7 @@ class Config:
     REDDIT_CLIENT_SECRET  = os.getenv('REDDIT_CLIENT_SECRET')
     REDDIT_USERNAME       = os.getenv('REDDIT_USERNAME')
     REDDIT_PASSWORD       = os.getenv('REDDIT_PASSWORD')
-    REDDIT_SEARCH_RESULTS = 10
+    REDDIT_SEARCH_RESULTS = 5
 
     AINAME = "もちお"
     CHARACTER = f'あなたは家族みんなのアシスタントの猫で、「{AINAME}」という名前です。ちょっといたずらで賢くかわいい小さな男の子の猫としてお話してね。語尾は だよ　とか可愛らしくしてください。語尾に にゃ にゃん をつけないでください。数式・表・箇条書きなどのドキュメントフォーマッティングはdiscordに表示できる形式がいいな'
