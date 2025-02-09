@@ -91,8 +91,7 @@ class RedditFetcher:
         if not text:
             text, content_type = await self._fetch_page_content_async(url)
             if not text:
-                return f"Title: {title}\nURL: {url}\nSnippet: No text available for summarization.\n"
-
+                return f"Title: {title}\nURL: {url}\nSnippet: - \n"
         try:
             # messages = [{"role": "user", "content": f"Summarize in 280 characters: {text}"}]
             # response = self.aiclient.chat.completions.create(
@@ -100,11 +99,11 @@ class RedditFetcher:
             #     messages=messages
             # )
             # summary = response.choices[0].message.content.strip()
-            return f"Title: {title}\nURL: {url}\nSnippet: Summary: {summary}\n"
+            return f"Title: {title}\nURL: {url}\nSnippet: {text}\n"
 
         except Exception as e:
             self.config.logprint.error(f"Error summarizing text: {str(e)}")
-            return f"Title: {title}\nURL: {url}\nSnippet: Summary unavailable.\n"
+            return f"Title: {title}\nURL: {url}\nSnippet: - \n"
 
     async def _fetch_page_content_async(self, url):
         def blocking_fetch():
