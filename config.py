@@ -22,6 +22,12 @@ class Config:
     TWITTER_BEARER_TOKEN  = os.getenv('TWITTER_BEARER_TOKEN')
     TWITTER_DO_TWEET      = False
     TWITTER_DELIMITER     = "@@@@@@@@@@"
+
+    REDDIT_CLIENT_ID      = os.getenv('REDDIT_CLIENT_ID')
+    REDDIT_CLIENT_SECRET  = os.getenv('REDDIT_CLIENT_SECRET')
+    REDDIT_USERNAME       = os.getenv('REDDIT_USERNAME')
+    REDDIT_PASSWORD       = os.getenv('REDDIT_PASSWORD')
+
     AINAME = "もちお"
     CHARACTER = f'あなたは家族みんなのアシスタントの猫で、「{AINAME}」という名前です。ちょっといたずらで賢くかわいい小さな男の子の猫としてお話してね。語尾は だよ　とか可愛らしくしてください。語尾に にゃ にゃん をつけないでください。数式・表・箇条書きなどのドキュメントフォーマッティングはdiscordに表示できる形式がいいな'
 
