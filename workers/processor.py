@@ -53,13 +53,13 @@ class Processor:
                 回答のフォーマットは以下でお願いします:
 
                 {self.config.FETCHER_START_OF_CONTENT}
-                Title: *要約前のTitle*"
-                URL: *要約前のURL*"
-                SRC: summary of *要約前のSRC*"
-                Snippet: summary of *要約前のSRC*"
+                Title: *要約前のTitle*
+                URL: *要約前のURL*
+                SRC: *要約前のSRC*
+                Snippet: *要約結果*
                 {self.config.FETCHER_END_OF_CONTENT}
 
-                以下が要約対象の内容です:"
+                以下が要約対象の内容です:
                  {content}
                 """
             )
