@@ -14,6 +14,9 @@ class Config:
     FETCHER_DO_FETCH         = False
     FETCHER_START_OF_CONTENT = "--- Start of content ---"
     FETCHER_END_OF_CONTENT   = "--- End   of content ---"
+
+    PROCESSOR_DO_EACH_SUMMARY = False
+    
     BING_API_KEY          = os.getenv('BING_API_KEY')
     BING_SEARCH_RESULTS   = 5
     BING_SEARCH_MAX_CONTENT_LENGTH = 5000

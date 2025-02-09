@@ -44,7 +44,10 @@ async def run_bot():
                 f_urls_merged = f_urls_file.read().splitlines()
 
         processor = Processor(context, config)  # Instantiate Processor with context and config
-        summary   = await processor.summarize_results_async(f_content_merged)
+        if config.PROCESSOR_DO_EACH_SUMMARY:
+            summary = await processor.process_and_summarize_async(f_content_merged)
+        else:
+            summary = await processor.summarize_results_async(f_content_merged)
 
         context.append({"role": "assistant", "content": summary})
         config.logprint.info("-Agent summary--------------------------------------------------------------")
@@ -64,5 +67,8 @@ if __name__ == "__main__":
 
     if not ('nofetch' in sys.argv):
         Config.FETCHER_DO_FETCH = True
+
+    if not ('nosummary' in sys.argv):
+        Config.PROCESSOR_DO_EACH_SUMMARY = True
 
     asyncio.run(run_bot())

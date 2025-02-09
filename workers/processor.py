@@ -22,7 +22,7 @@ class Processor:
             f" - 要約が終わった後に{self.config.TWITTER_DELIMITER}で切ったのち、締めのコメントをする。締めのコメントは内容からいきなり書き始めてください。つまり、 締めのコメント などの見出しはつけないでください"
             f" - 要約の文体も{self.config.AINAME}になるように気をつけてください"
             f" - 最後に参考記事のURLを投稿する"
-            f" - 参考記事の各URKの前に必ず{self.config.TWITTER_DELIMITER}と書き、次の行にリンクを記載"
+            f" - 参考記事の各URLの前に必ず{self.config.TWITTER_DELIMITER}と書き、次の行にリンクを記載"
             f" 以下が要約対象の検索結果です:"
             f"  {snippets}"
         )
@@ -41,3 +41,51 @@ class Processor:
         summary = response.choices[0].message.content
 
         return f"{summary}"
+
+    async def summarize_each_result_async(self, contents):
+        summaries = []
+        for content in contents:
+            p_src = (
+                f"あなたは著名テクノロジー企業の創業者です。あなたは以下の内容を要約してください。"
+                f" 要約は、会話履歴を踏まえつつ私が知りたいことの主旨を把握の上で作ってください。"
+                f" 仮に内容が英語でも回答は日本語でお願いします。"
+                f" なお、回答がより高品質になるのならば、あなたの内部知識を加味して回答を作っても構いません。\n"
+                f" 回答のフォーマットは以下でお願いします:\n\n"
+                f" {self.config.FETCHER_START_OF_CONTENT}\n"
+                f" Title: *要約前のTitle*"
+                f" URL: *要約前のURL*"
+                f" SRC: summary of *要約前のSRC*"
+                f" Snippet: summary of *要約前のSRC*"
+                f" {self.config.FETCHER_END_OF_CONTENT}\n\n"
+                f" 以下が要約対象の内容です:\n"
+                f"  {content}"
+            )
+
+            def blocking_chat_completion():
+                messages = [{"role": "system", "content": self.config.CHARACTER}]
+                messages.extend(self.context)
+                messages.append({"role": "user", "content": p_src})
+
+                return self.aiclient.chat.completions.create(
+                    model=self.config.OPENAI_GPT_MODEL,
+                    messages=messages
+                )
+
+            response = await asyncio.to_thread(blocking_chat_completion)
+            summary = response.choices[0].message.content
+            summaries.append(summary)
+
+        self.config.logprint.info("= summarize_each_result ============================================")
+        self.config.logprint.info(f"summaries: {summaries}")
+        self.config.logprint.info("= End of summarize_each_result =====================================")
+        final_summary = await self.summarize_results_async(" ".join(summaries))
+        return final_summary
+
+    def split_contents(self, raw_content):
+        contents = raw_content.split('--- Start of content ---')
+        return [content.strip() for content in contents if content.strip()]
+
+    async def process_and_summarize_async(self, raw_content):
+        contents = self.split_contents(raw_content)
+        final_summary = await self.summarize_each_result_async(contents)
+        return final_summary
