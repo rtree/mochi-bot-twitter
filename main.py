@@ -13,8 +13,8 @@ async def run_bot():
         config = Config()  # Instantiate Config
         context = deque(maxlen=config.OPENAI_HISTORY_LENGTH)  # Instantiate context
         fetchers = [BingFetcher(context, config),
-                    #RedditFetcher(context, config),
-                  ]
+                    RedditFetcher(context, config),
+                   ]
 
         combined_search_results = ""
         all_urls = []
