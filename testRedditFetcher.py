@@ -8,6 +8,6 @@ if __name__ == "__main__":
     context = deque(maxlen=config.OPENAI_HISTORY_LENGTH)  # Instantiate context
     fetcher = RedditFetcher(context, config)
     summaries, urls = asyncio.run(fetcher.fetch())
-    print(summaries)  # Print summarized Reddit posts
+    #print(summaries)  # Print summarized Reddit posts
     print(urls)       # Print extracted post URLs
     print("Done.")    # Print completion message
