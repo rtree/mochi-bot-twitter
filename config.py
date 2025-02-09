@@ -7,15 +7,20 @@ from datetime import datetime
 load_dotenv()
 
 class Config:
+    # if argument 'nofetch'   is not in sys.argv, set to True -> fetch content from the web
+    FETCHER_DO_FETCH          = False
+    # if argument 'notweet'   is not in sys.argv, set to True -> tweet the summary 
+    TWITTER_DO_TWEET          = False
+    # if argument 'nosummary' is not in sys.argv, set to True -> summarize each search result
+    PROCESSOR_DO_EACH_SUMMARY = False 
+
     OPENAI_API_KEY        = os.getenv('OPENAI_API_KEY')
     OPENAI_GPT_MODEL      = os.getenv('OPENAI_GPT_MODEL')
     OPENAI_HISTORY_LENGTH = 10
 
-    FETCHER_DO_FETCH         = False
     FETCHER_START_OF_CONTENT = "--- Start of content ---"
     FETCHER_END_OF_CONTENT   = "--- End   of content ---"
 
-    PROCESSOR_DO_EACH_SUMMARY = False
 
     BING_API_KEY          = os.getenv('BING_API_KEY')
     BING_SEARCH_RESULTS   = 10
@@ -26,7 +31,6 @@ class Config:
     REDDIT_PASSWORD       = os.getenv('REDDIT_PASSWORD')
     REDDIT_SEARCH_RESULTS = 10
 
-    TWITTER_DO_TWEET      = False
     TWITTER_API_KEY       = os.getenv('TWITTER_API_KEY')
     TWITTER_API_SECRET    = os.getenv('TWITTER_API_SECRET')
     TWITTER_ACCESS_TOKEN  = os.getenv('TWITTER_ACCESS_TOKEN')
