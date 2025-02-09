@@ -19,12 +19,15 @@ class RedditFetcher:
         discIn.append({"role": "user", "content": msg})
         self.context.extend(discIn)
 
-        search_results = self.search_reddit()
-        search_results = await self.summarize_results_with_pages_async(search_results)
+        search_results = self._search_reddit()
+        fetched = await self._summarize_results_with_pages_async(search_results)
 
-        return search_results
+        # Extract URLs from search results
+        urls = search_results['urls']
 
-    def search_reddit(self):
+        return fetched, urls
+
+    def _search_reddit(self):
         url = "https://www.reddit.com/r/technology/top/.json?count=10"
         headers = {"User-Agent": "Mozilla/5.0"}
         response = requests.get(url, headers=headers)
@@ -40,7 +43,7 @@ class RedditFetcher:
             self.config.logprint.info("---")
         return search_data
 
-    async def fetch_page_content_async(self, url):
+    async def _fetch_page_content_async(self, url):
         def blocking_fetch():
             try:
                 response = requests.get(url, timeout=10)
@@ -69,10 +72,10 @@ class RedditFetcher:
         content, ctype = await asyncio.to_thread(blocking_fetch)
         return content, ctype
     
-    async def summarize_results_with_pages_async(self, search_results):
+    async def _summarize_results_with_pages_async(self, search_results):
         content_list = []
         web_results = search_results['urls']
-        tasks = [self.fetch_page_content_async(url) for url in web_results]
+        tasks = [self._fetch_page_content_async(url) for url in web_results]
         pages = await asyncio.gather(*tasks, return_exceptions=True)
         for (url, page_result) in zip(web_results, pages):
             title = url

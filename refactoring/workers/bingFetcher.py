@@ -22,15 +22,18 @@ class BingFetcher:
         discIn.append({"role": "user", "content": msg})
         self.context.extend(discIn)
 
-        parsed_result  = self.parse_prompt()
-        keywords       = self.extract_keywords(parsed_result)
+        parsed_result  = self._parse_prompt()
+        keywords       = self._extract_keywords(parsed_result)
         self.config.logprint.info(f"keyword: {keywords}")
-        search_results = self.search_bing(keywords)
-        search_results = await self.summarize_results_with_pages_async(search_results)
+        search_results = self._search_bing(keywords)
+        fetched = await self._summarize_results_with_pages_async(search_results)
 
-        return search_results
+        # Extract URLs from search results
+        urls = [result['url'] for result in search_results.get('webPages', {}).get('value', [])]
 
-    def parse_prompt(self):
+        return fetched, urls
+
+    def _parse_prompt(self):
         p_src = f"あなたはユーザーのプロンプトを分析し、主題、サブテーマ、関連キーワードを抽出するアシスタントです。"
         p_src = f"{p_src} 会話履歴を分析し、直近のユーザ入力への回答を満たす主題、サブテーマ、関連キーワードを抽出してください。英語で出力してください"
         messages = []
@@ -46,7 +49,7 @@ class BingFetcher:
 
         return response.choices[0].message.content
 
-    def extract_keywords(self, parsed_text):
+    def _extract_keywords(self, parsed_text):
         p_src = f"あなたは解析されたプロンプト情報から簡潔な検索キーワードを抽出します。"
         p_src = f"会話履歴を踏まえつつ、このテキストから会話の目的を最も達成する検索キーワードを抽出してください。結果は検索キーワードのみを半角スペースで区切って出力してください。検索キーワードは英語で出力してください:{parsed_text}"
         messages = []
@@ -62,7 +65,7 @@ class BingFetcher:
 
         return response.choices[0].message.content
 
-    def search_bing(self, query, count=None):
+    def _search_bing(self, query, count=None):
         if count is None:
             count = self.config.BING_SEARCH_RESULTS
         url = "https://api.bing.microsoft.com/v7.0/search"
@@ -82,7 +85,26 @@ class BingFetcher:
             self.config.logprint.info("---")
         return search_data
 
-    async def fetch_page_content_async(self, url):
+    async def _summarize_results_with_pages_async(self, search_results):
+        content_list = []
+        web_results = search_results.get('webPages', {}).get('value', [])[:self.config.BING_SEARCH_RESULTS]
+        tasks = [self._fetch_page_content_async(r['url']) for r in web_results]
+        pages = await asyncio.gather(*tasks, return_exceptions=True)
+        for (r, page_result) in zip(web_results, pages):
+            title = r['name']
+            snippet = r['snippet']
+            url = r['url']
+            if isinstance(page_result, Exception):
+                content_list.append(f"タイトル: {title}\nURL: {url}\nスニペット:\n{snippet}\n")
+                continue
+            page_content, content_type = page_result
+            if content_type in ("HTML", "PDF") and page_content:
+                content_list.append(f"タイトル: {title}\nURL: {url}\n内容:\n{page_content}\n")
+            else:
+                content_list.append(f"タイトル: {title}\nURL: {url}\nスニペット:\n{snippet}\n")
+        return "\n".join(content_list)
+
+    async def _fetch_page_content_async(self, url):
         def blocking_fetch():
             try:
                 response = requests.get(url, timeout=10)
@@ -110,23 +132,4 @@ class BingFetcher:
 
         content, ctype = await asyncio.to_thread(blocking_fetch)
         return content, ctype
-    
-    async def summarize_results_with_pages_async(self, search_results):
-        content_list = []
-        web_results = search_results.get('webPages', {}).get('value', [])[:self.config.BING_SEARCH_RESULTS]
-        tasks = [self.fetch_page_content_async(r['url']) for r in web_results]
-        pages = await asyncio.gather(*tasks, return_exceptions=True)
-        for (r, page_result) in zip(web_results, pages):
-            title = r['name']
-            snippet = r['snippet']
-            url = r['url']
-            if isinstance(page_result, Exception):
-                content_list.append(f"タイトル: {title}\nURL: {url}\nスニペット:\n{snippet}\n")
-                continue
-            page_content, content_type = page_result
-            if content_type in ("HTML", "PDF") and page_content:
-                content_list.append(f"タイトル: {title}\nURL: {url}\n内容:\n{page_content}\n")
-            else:
-                content_list.append(f"タイトル: {title}\nURL: {url}\nスニペット:\n{snippet}\n")
-        return "\n".join(content_list)
 
