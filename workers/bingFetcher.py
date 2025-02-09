@@ -12,6 +12,7 @@ class BingFetcher:
         self.context = context
         self.config = config
         self.aiclient = OpenAI(api_key=config.OPENAI_API_KEY)
+        self.srcname = "Bing"
 
     async def fetch(self):
         msg = f"今日のニュースをまとめて。今日は ({datetime.today().strftime('%Y-%m-%d')}) です。ジャンルは経済・テクノロジーでお願いします。検索する場合はニュースの期間指定もお願いします"
@@ -95,13 +96,13 @@ class BingFetcher:
             snippet = r['snippet']
             url = r['url']
             if isinstance(page_result, Exception):
-                content_list.append(f"{self.config.FETCHER_START_OF_CONTENT}\nタイトル: {title}\nURL: {url}\nスニペット:\n{snippet}\n{self.config.FETCHER_END_OF_CONTENT}\n")
+                content_list.append(f"{self.config.FETCHER_START_OF_CONTENT}\nタイトル: {title}\nURL: {url}\nスニペット:\n{snippet}\nSRC: {self.srcname}\n{self.config.FETCHER_END_OF_CONTENT}\n")
                 continue
             page_content, content_type = page_result
             if content_type in ("HTML", "PDF") and page_content:
-                content_list.append(f"{self.config.FETCHER_START_OF_CONTENT}\nタイトル: {title}\nURL: {url}\n内容:\n{page_content}\n{self.config.FETCHER_END_OF_CONTENT}\n")
+                content_list.append(f"{self.config.FETCHER_START_OF_CONTENT}\nタイトル: {title}\nURL: {url}\n内容:\n{page_content}\nSRC: {self.srcname}\n{self.config.FETCHER_END_OF_CONTENT}\n")
             else:
-                content_list.append(f"{self.config.FETCHER_START_OF_CONTENT}\nタイトル: {title}\nURL: {url}\nスニペット:\n{snippet}\n{self.config.FETCHER_END_OF_CONTENT}\n")
+                content_list.append(f"{self.config.FETCHER_START_OF_CONTENT}\nタイトル: {title}\nURL: {url}\nスニペット:\n{snippet}\nSRC: {self.srcname}\n{self.config.FETCHER_END_OF_CONTENT}\n")
         return "\n".join(content_list)
 
     async def _fetch_page_content_async(self, url):

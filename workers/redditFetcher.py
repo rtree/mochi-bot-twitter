@@ -15,6 +15,7 @@ class RedditFetcher:
         self.aiclient = OpenAI(api_key=config.OPENAI_API_KEY)  # OpenAI Client
         self.headers = {"User-Agent": "YourApp/1.0 (by YourRedditUsername)"}
         self.access_token = None
+        self.srcname = "Reddit"
 
     async def fetch(self):
         """Fetch trending Reddit posts, extract key content, and summarize."""
@@ -99,7 +100,7 @@ class RedditFetcher:
         if not text:
             text, content_type = await self._fetch_page_content_async(url)
             if not text:
-                return f"Title: {title}\nURL: {url}\nSnippet: - \n"
+                return f"Title: {title}\nURL: {url}\nSRC: {self.srcname}\nSnippet: - \n"
         try:
             # messages = [{"role": "user", "content": f"Summarize in 280 characters: {text}"}]
             # response = self.aiclient.chat.completions.create(
@@ -107,11 +108,11 @@ class RedditFetcher:
             #     messages=messages
             # )
             # summary = response.choices[0].message.content.strip()
-            return f"{self.config.FETCHER_START_OF_CONTENT}\nTitle: {title}\nURL: {url}\nSnippet: {text}\n{self.config.FETCHER_END_OF_CONTENT}\n"
+            return f"{self.config.FETCHER_START_OF_CONTENT}\nTitle: {title}\nURL: {url}\nSRC: {self.srcname}\nSnippet: {text}\n{self.config.FETCHER_END_OF_CONTENT}\n"
 
         except Exception as e:
             self.config.logprint.error(f"Error summarizing text: {str(e)}")
-            return f"{self.config.FETCHER_START_OF_CONTENT}\nTitle: {title}\nURL: {url}\nSnippet: - \n{self.config.FETCHER_END_OF_CONTENT}\n"
+            return f"{self.config.FETCHER_START_OF_CONTENT}\nTitle: {title}\nURL: {url}\nSRC: {self.srcname}\nSnippet: - \n{self.config.FETCHER_END_OF_CONTENT}\n"
 
     async def _fetch_page_content_async(self, url):
         def blocking_fetch():
