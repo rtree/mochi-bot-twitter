@@ -50,7 +50,7 @@ class RedditFetcher:
     async def _search_reddit(self):
         """Fetch top posts from Reddit API with authentication."""
         url = "https://oauth.reddit.com/r/technology/top"
-        params = {"limit": 10}
+        params = {"limit": self.config.REDDIT_SEARCH_RESULTS}
 
         async with aiohttp.ClientSession() as session:
             async with session.get(url, headers=self.headers, params=params) as response:
@@ -89,7 +89,7 @@ class RedditFetcher:
     async def _summarize_text(self, title, text, url):
         """Uses AI to summarize post content asynchronously."""
         if not text:
-            return f"📰 {title}\n🔗 {url}\n📌 No text available for summarization.\n"
+            return f"Title: {title}\nURL: {url}\nSnippet: No text available for summarization.\n"
 
         try:
             messages = [{"role": "user", "content": f"Summarize in 280 characters: {text}"}]
@@ -98,9 +98,9 @@ class RedditFetcher:
                 messages=messages
             )
             summary = response.choices[0].message.content.strip()
-            return f"📰 {title}\n🔗 {url}\n📌 Summary: {summary}\n"
+            return f"Title: {title}\nURL: {url}\nSnippet: Summary: {summary}\n"
 
         except Exception as e:
             self.config.logprint.error(f"Error summarizing text: {str(e)}")
-            return f"📰 {title}\n🔗 {url}\n📌 Summary unavailable.\n"
+            return f"Title: {title}\nURL: {url}\nSnippet: Summary unavailable.\n"
 
