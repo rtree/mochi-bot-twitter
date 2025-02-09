@@ -107,11 +107,11 @@ class RedditFetcher:
             #     messages=messages
             # )
             # summary = response.choices[0].message.content.strip()
-            return f"Title: {title}\nURL: {url}\nSnippet: {text}\n"
+            return f"{self.config.FETCHER_START_OF_CONTENT}\nTitle: {title}\nURL: {url}\nSnippet: {text}\n{self.config.FETCHER_END_OF_CONTENT}\n"
 
         except Exception as e:
             self.config.logprint.error(f"Error summarizing text: {str(e)}")
-            return f"Title: {title}\nURL: {url}\nSnippet: - \n"
+            return f"{self.config.FETCHER_START_OF_CONTENT}\nTitle: {title}\nURL: {url}\nSnippet: - \n{self.config.FETCHER_END_OF_CONTENT}\n"
 
     async def _fetch_page_content_async(self, url):
         def blocking_fetch():

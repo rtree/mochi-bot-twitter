@@ -95,13 +95,13 @@ class BingFetcher:
             snippet = r['snippet']
             url = r['url']
             if isinstance(page_result, Exception):
-                content_list.append(f"タイトル: {title}\nURL: {url}\nスニペット:\n{snippet}\n")
+                content_list.append(f"{self.config.FETCHER_START_OF_CONTENT}\nタイトル: {title}\nURL: {url}\nスニペット:\n{snippet}\n{self.config.FETCHER_END_OF_CONTENT}\n")
                 continue
             page_content, content_type = page_result
             if content_type in ("HTML", "PDF") and page_content:
-                content_list.append(f"タイトル: {title}\nURL: {url}\n内容:\n{page_content}\n")
+                content_list.append(f"{self.config.FETCHER_START_OF_CONTENT}\nタイトル: {title}\nURL: {url}\n内容:\n{page_content}\n{self.config.FETCHER_END_OF_CONTENT}\n")
             else:
-                content_list.append(f"タイトル: {title}\nURL: {url}\nスニペット:\n{snippet}\n")
+                content_list.append(f"{self.config.FETCHER_START_OF_CONTENT}\nタイトル: {title}\nURL: {url}\nスニペット:\n{snippet}\n{self.config.FETCHER_END_OF_CONTENT}\n")
         return "\n".join(content_list)
 
     async def _fetch_page_content_async(self, url):
