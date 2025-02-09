@@ -1,7 +1,7 @@
 import asyncio
 import base64
 import requests
-import openai
+from openai import OpenAI
 from datetime import datetime
 from PyPDF2 import PdfReader
 from io import BytesIO
