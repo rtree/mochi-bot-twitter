@@ -16,15 +16,15 @@ class Config:
     FETCHER_END_OF_CONTENT   = "--- End   of content ---"
 
     PROCESSOR_DO_EACH_SUMMARY = False
-    
+
     BING_API_KEY          = os.getenv('BING_API_KEY')
-    BING_SEARCH_RESULTS   = 5
+    BING_SEARCH_RESULTS   = 10
     BING_SEARCH_MAX_CONTENT_LENGTH = 5000
     REDDIT_CLIENT_ID      = os.getenv('REDDIT_CLIENT_ID')
     REDDIT_CLIENT_SECRET  = os.getenv('REDDIT_CLIENT_SECRET')
     REDDIT_USERNAME       = os.getenv('REDDIT_USERNAME')
     REDDIT_PASSWORD       = os.getenv('REDDIT_PASSWORD')
-    REDDIT_SEARCH_RESULTS = 5
+    REDDIT_SEARCH_RESULTS = 10
 
     TWITTER_DO_TWEET      = False
     TWITTER_API_KEY       = os.getenv('TWITTER_API_KEY')
