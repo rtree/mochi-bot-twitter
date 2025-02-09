@@ -46,19 +46,22 @@ class Processor:
         summaries = []
         for content in contents:
             p_src = (
-                f"あなたは著名テクノロジー企業の創業者です。あなたは以下の内容を要約してください。"
-                f" 要約は、会話履歴を踏まえつつ私が知りたいことの主旨を把握の上で作ってください。"
-                f" 仮に内容が英語でも回答は日本語でお願いします。"
-                f" なお、回答がより高品質になるのならば、あなたの内部知識を加味して回答を作っても構いません。\n"
-                f" 回答のフォーマットは以下でお願いします:\n\n"
-                f" {self.config.FETCHER_START_OF_CONTENT}\n"
-                f" Title: *要約前のTitle*"
-                f" URL: *要約前のURL*"
-                f" SRC: summary of *要約前のSRC*"
-                f" Snippet: summary of *要約前のSRC*"
-                f" {self.config.FETCHER_END_OF_CONTENT}\n\n"
-                f" 以下が要約対象の内容です:\n"
-                f"  {content}"
+                f"""あなたは著名テクノロジー企業の創業者です。あなたは以下の内容を要約してください。
+                要約は、会話履歴を踏まえつつ私が知りたいことの主旨を把握の上で作ってください。
+                仮に内容が英語でも回答は日本語でお願いします。
+                なお、回答がより高品質になるのならば、あなたの内部知識を加味して回答を作っても構いません。
+                回答のフォーマットは以下でお願いします:
+
+                {self.config.FETCHER_START_OF_CONTENT}
+                Title: *要約前のTitle*"
+                URL: *要約前のURL*"
+                SRC: summary of *要約前のSRC*"
+                Snippet: summary of *要約前のSRC*"
+                {self.config.FETCHER_END_OF_CONTENT}
+
+                以下が要約対象の内容です:"
+                 {content}
+                """
             )
 
             def blocking_chat_completion():
@@ -74,10 +77,10 @@ class Processor:
             response = await asyncio.to_thread(blocking_chat_completion)
             summary = response.choices[0].message.content
             summaries.append(summary)
+            self.config.logprint.info("= summarize_each_result ============================================")
+            self.config.logprint.info(f"summarie: \n{summary}\n")
+            self.config.logprint.info("= End of summarize_each_result =====================================")
 
-        self.config.logprint.info("= summarize_each_result ============================================")
-        self.config.logprint.info(f"summaries: {summaries}")
-        self.config.logprint.info("= End of summarize_each_result =====================================")
         final_summary = await self.summarize_results_async(" ".join(summaries))
         return final_summary
 
