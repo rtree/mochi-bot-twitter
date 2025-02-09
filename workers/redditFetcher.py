@@ -76,9 +76,9 @@ class RedditFetcher:
                 self.config.logprint.info("Reddit Search Results:")
                 for post in posts:
                     post_data = post["data"]
-                    self.config.logprint.info(f"Title: {post_data.get("title")}")
-                    self.config.logprint.info(f"URL: {post_data.get("url")}")
-                    self.config.logprint.info(f"Snippet: post_data.get("selftext", "")")
+                    self.config.logprint.info(f"Title: {post_data.get('title')}")
+                    self.config.logprint.info(f"URL: {post_data.get('url')}")
+                    self.config.logprint.info(f"Snippet: {post_data.get("selftext", '')}")
                     self.config.logprint.info("---")
 
                 return {"posts": extracted_posts, "urls": urls}
