@@ -11,23 +11,23 @@ class Config:
     OPENAI_GPT_MODEL      = os.getenv('OPENAI_GPT_MODEL')
     OPENAI_HISTORY_LENGTH = 10
 
+    FETCHER_DO_FETCH      = False
     BING_API_KEY          = os.getenv('BING_API_KEY')
     BING_SEARCH_RESULTS   = 5
     BING_SEARCH_MAX_CONTENT_LENGTH = 5000
-
-    TWITTER_API_KEY       = os.getenv('TWITTER_API_KEY')
-    TWITTER_API_SECRET    = os.getenv('TWITTER_API_SECRET')
-    TWITTER_ACCESS_TOKEN  = os.getenv('TWITTER_ACCESS_TOKEN')
-    TWITTER_ACCESS_SECRET = os.getenv('TWITTER_ACCESS_SECRET')
-    TWITTER_BEARER_TOKEN  = os.getenv('TWITTER_BEARER_TOKEN')
-    TWITTER_DO_TWEET      = False
-    TWITTER_DELIMITER     = "@@@@@@@@@@"
-
     REDDIT_CLIENT_ID      = os.getenv('REDDIT_CLIENT_ID')
     REDDIT_CLIENT_SECRET  = os.getenv('REDDIT_CLIENT_SECRET')
     REDDIT_USERNAME       = os.getenv('REDDIT_USERNAME')
     REDDIT_PASSWORD       = os.getenv('REDDIT_PASSWORD')
     REDDIT_SEARCH_RESULTS = 5
+
+    TWITTER_DO_TWEET      = False
+    TWITTER_API_KEY       = os.getenv('TWITTER_API_KEY')
+    TWITTER_API_SECRET    = os.getenv('TWITTER_API_SECRET')
+    TWITTER_ACCESS_TOKEN  = os.getenv('TWITTER_ACCESS_TOKEN')
+    TWITTER_ACCESS_SECRET = os.getenv('TWITTER_ACCESS_SECRET')
+    TWITTER_BEARER_TOKEN  = os.getenv('TWITTER_BEARER_TOKEN')
+    TWITTER_DELIMITER     = "@@@@@@@@@@"
 
     AINAME = "もちお"
     CHARACTER = f'あなたは家族みんなのアシスタントの猫で、「{AINAME}」という名前です。ちょっといたずらで賢くかわいい小さな男の子の猫としてお話してね。語尾は だよ　とか可愛らしくしてください。語尾に にゃ にゃん をつけないでください。数式・表・箇条書きなどのドキュメントフォーマッティングはdiscordに表示できる形式がいいな'

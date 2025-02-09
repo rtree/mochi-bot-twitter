@@ -1,3 +1,4 @@
+import os
 from collections import deque
 import asyncio
 import sys
@@ -12,22 +13,38 @@ async def run_bot():
     try:
         config = Config()  # Instantiate Config
         context = deque(maxlen=config.OPENAI_HISTORY_LENGTH)  # Instantiate context
-        fetchers = [BingFetcher(context, config),
-                    RedditFetcher(context, config),
-                   ]
 
-        combined_search_results = ""
-        all_urls = []
-        for fetcher in fetchers:
-            try:
-                fetched_content, urls = await fetcher.fetch()
-                combined_search_results += fetched_content + "\n\n"
-                all_urls.extend(urls)
-            except Exception as e:
-                config.elogprint.error(f"Error in fetcher {fetcher.__class__.__name__}: {str(e)}")
+        f_content_merged = ""
+        f_urls_merged = []
+
+        if config.FETCHER_DO_FETCH:
+            fetchers = [BingFetcher(context, config),
+                        RedditFetcher(context, config),
+                       ]
+
+            for fetcher in fetchers:
+                try:
+                    fetched_content, urls = await fetcher.fetch()
+                    f_content_merged += fetched_content + "\n\n"
+                    f_urls_merged.extend(urls)
+                except Exception as e:
+                    config.elogprint.error(f"Error in fetcher {fetcher.__class__.__name__}: {str(e)}")
+
+            # Save fetched content and URLs to log files
+            os.makedirs('./.log', exist_ok=True)
+            with open('./.log/f_content_merged.log', 'w') as f_content_file:
+                f_content_file.write(f_content_merged)
+            with open('./.log/f_urls_merged.log', 'w') as f_urls_file:
+                f_urls_file.write('\n'.join(f_urls_merged))
+        else:
+            # Read content and URLs from log files
+            with open('./.log/f_content_merged.log', 'r') as f_content_file:
+                f_content_merged = f_content_file.read()
+            with open('./.log/f_urls_merged.log', 'r') as f_urls_file:
+                f_urls_merged = f_urls_file.read().splitlines()
 
         processor = Processor(context, config)  # Instantiate Processor with context and config
-        summary   = await processor.summarize_results_async(combined_search_results)
+        summary   = await processor.summarize_results_async(f_content_merged)
 
         context.append({"role": "assistant", "content": summary})
         config.logprint.info("-Agent summary--------------------------------------------------------------")
@@ -42,7 +59,10 @@ async def run_bot():
         return f"Error: {str(e)}"
 
 if __name__ == "__main__":
-    if not ('test' in sys.argv):
+    if not ('notweet' in sys.argv):
         Config.TWITTER_DO_TWEET = True
+
+    if not ('nofetch' in sys.argv):
+        Config.FETCHER_DO_FETCH = True
 
     asyncio.run(run_bot())
