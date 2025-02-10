@@ -21,7 +21,6 @@ class Config:
     FETCHER_START_OF_CONTENT = "--- Start of content ---"
     FETCHER_END_OF_CONTENT   = "--- End   of content ---"
 
-
     BING_API_KEY          = os.getenv('BING_API_KEY')
     BING_SEARCH_RESULTS   = 10
     BING_SEARCH_MAX_CONTENT_LENGTH = 5000
@@ -30,6 +29,9 @@ class Config:
     REDDIT_USERNAME       = os.getenv('REDDIT_USERNAME')
     REDDIT_PASSWORD       = os.getenv('REDDIT_PASSWORD')
     REDDIT_SEARCH_RESULTS = 10
+
+    HACKER_NEWS_COMMENTS  = 70
+    HACKER_NEWS_POINTS    = 150
 
     TWITTER_API_KEY       = os.getenv('TWITTER_API_KEY')
     TWITTER_API_SECRET    = os.getenv('TWITTER_API_SECRET')

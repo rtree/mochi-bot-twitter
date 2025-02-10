@@ -35,7 +35,7 @@ class HackerNewsRssFetcher:
 
     async def _fetch_hacker_news(self):
         """Fetch top posts from Hacker News RSS feed."""
-        url = "https://hnrss.org/frontpage"
+        url = f"https://hnrss.org/frontpage?comments={self.config.HACKER_NEWS_COMMENTS}&points={self.config.HACKER_NEWS_POINTS}"
 
         async with aiohttp.ClientSession() as session:
             async with session.get(url, headers=self.headers) as response:
