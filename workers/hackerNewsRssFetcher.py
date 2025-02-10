@@ -47,10 +47,12 @@ class HackerNewsRssFetcher:
                 extracted_posts = []
                 urls = []
                 for entry in feed.entries:
+                    content, content_type = await self._fetch_page_content_async(entry.link)
+                    full_snippet = f"{entry.summary}\n\n{content}" if content else entry.summary
                     extracted_posts.append({
                         "title": entry.title,
                         "url": entry.link,
-                        "selftext": entry.summary,  # Fetch post content
+                        "selftext": full_snippet,  # Fetch post content
                     })
                     urls.append(entry.link)
 
