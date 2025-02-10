@@ -8,6 +8,7 @@ from workers.dispatcher import Dispatcher
 from workers.processor  import Processor
 from workers.redditFetcher import RedditFetcher
 from workers.bingFetcher import BingFetcher
+from workers.hackerNewsRssFetcher import HackerNewsRssFetcher
 
 async def run_bot():
     try:
@@ -20,6 +21,7 @@ async def run_bot():
         if config.FETCHER_DO_FETCH:
             fetchers = [BingFetcher(context, config),
                         RedditFetcher(context, config),
+                        HackerNewsRssFetcher(context, config),
                        ]
 
             for fetcher in fetchers:
