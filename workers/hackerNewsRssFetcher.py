@@ -30,11 +30,10 @@ class HackerNewsRssFetcher:
             self.config.logprint.error("No data fetched from Hacker News.")
             return "Hacker Newsからデータを取得できませんでした。"
 
-        fetched_summaries = await self._summarize_posts_async(hacker_news_data)
-        return fetched_summaries, hacker_news_data['urls']
+        return hacker_news_data['summaries'], hacker_news_data['urls']
 
     async def _fetch_hacker_news(self):
-        """Fetch top posts from Hacker News RSS feed."""
+        """Fetch top posts from Hacker News RSS feed and summarize."""
         url = f"https://hnrss.org/frontpage?comments={self.config.HACKER_NEWS_COMMENTS}&points={self.config.HACKER_NEWS_POINTS}"
 
         async with aiohttp.ClientSession() as session:
@@ -46,6 +45,7 @@ class HackerNewsRssFetcher:
                 feed = feedparser.parse(await response.text())
                 extracted_posts = []
                 urls = []
+                summaries = []
                 for entry in feed.entries:
                     content, content_type = await self._fetch_page_content_async(entry.link)
                     full_snippet = f"{entry.summary}\n\n{content}" if content else entry.summary
@@ -55,6 +55,8 @@ class HackerNewsRssFetcher:
                         "selftext": full_snippet,  # Fetch post content
                     })
                     urls.append(entry.link)
+                    summary = await self._summarize_text(entry.title, full_snippet, entry.link)
+                    summaries.append(summary)
 
                 self.config.logprint.info("Hacker News Search Results:")
                 for entry in feed.entries:
@@ -63,18 +65,7 @@ class HackerNewsRssFetcher:
                     self.config.logprint.info(f"Snippet: {entry.summary}")
                     self.config.logprint.info("---")
 
-                return {"posts": extracted_posts, "urls": urls}
-
-    async def _summarize_posts_async(self, hacker_news_data):
-        """Summarizes Hacker News posts using AI."""
-        content_list = []
-        tasks = [self._summarize_text(post["title"], post["selftext"], post["url"]) for post in hacker_news_data["posts"]]
-        summaries = await asyncio.gather(*tasks, return_exceptions=True)
-
-        for summary in summaries:
-            content_list.append(summary)
-
-        return "\n".join(content_list)
+                return {"posts": extracted_posts, "urls": urls, "summaries": "\n".join(summaries)}
 
     async def _summarize_text(self, title, text, url):
         """Uses AI to summarize post content asynchronously."""
