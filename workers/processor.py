@@ -84,11 +84,16 @@ class Processor:
         final_summary = await self.summarize_results_async(" ".join(summaries))
         return final_summary
 
-    def split_contents(self, raw_content):
-        contents = raw_content.split('--- Start of content ---')
-        return [content.strip() for content in contents if content.strip()]
+    def _split_contents(self, raw_content):
+        contents = raw_content.split(self.config.FETCHER_START_OF_CONTENT)
+        cleaned_contents = []
+        for content in contents:
+            if content.strip():
+                cleaned_content = content.split(self.config.FETCHER_END_OF_CONTENT)[0].strip()
+                cleaned_contents.append(cleaned_content)
+        return cleaned_contents
 
-    async def process_and_summarize_async(self, raw_content):
-        contents = self.split_contents(raw_content)
+    async def summarize_results_after_each_summary_async(self, raw_content):
+        contents = self._split_contents(raw_content)
         final_summary = await self.summarize_each_result_async(contents)
         return final_summary

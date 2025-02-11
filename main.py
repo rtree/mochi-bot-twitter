@@ -47,7 +47,7 @@ async def run_bot():
 
         processor = Processor(context, config)  # Instantiate Processor with context and config
         if config.PROCESSOR_DO_EACH_SUMMARY:
-            summary = await processor.process_and_summarize_async(f_content_merged)
+            summary = await processor.summarize_results_after_each_summary_async(f_content_merged)
         else:
             summary = await processor.summarize_results_async(f_content_merged)
 
