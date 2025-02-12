@@ -15,7 +15,8 @@ class BingFetcher:
         self.srcname = "Bing"
 
     async def fetch(self):
-        msg = f"今日のニュースをまとめて。今日は ({datetime.today().strftime('%Y-%m-%d')}) です。ジャンルは経済・テクノロジーでお願いします。検索する場合はニュースの期間指定もお願いします"
+        #msg = f"今日のニュースをまとめて。今日は ({datetime.today().strftime('%Y-%m-%d')}) です。ジャンルは経済・テクノロジーでお願いします。検索する場合はニュースの期間指定もお願いします"
+        msg = f"今日のニュースをまとめて。今日は ({datetime.today().strftime('%Y-%m-%d')}) です。ジャンルはテクノロジーでお願いします。目先の細かな動きよりも、世の中を大きく動かす可能性があるものやインパクトが大きいものを知りたいです。検索する場合はニュースの期間指定もお願いします"
         img_url = None
         self.config.logprint.info("-User input------------------------------------------------------------------")
         self.config.logprint.info(f"  Message content: '{msg}'")
