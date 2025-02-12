@@ -81,10 +81,10 @@ class Processor:
             self.config.logprint.info(f"summarie: \n{summary}\n")
             self.config.logprint.info("= End of summarize_each_result =====================================")
 
-        final_summary = await self.summarize_results_async(" ".join(summaries))
-        return final_summary
+        #final_summary = await self.summarize_results_async(" ".join(summaries))
+        return " ".join(summaries)
 
-    def _split_contents(self, raw_content):
+    def split_contents(self, raw_content):
         contents = raw_content.split(self.config.FETCHER_START_OF_CONTENT)
         cleaned_contents = []
         for content in contents:
@@ -93,7 +93,7 @@ class Processor:
                 cleaned_contents.append(cleaned_content)
         return cleaned_contents
 
-    async def summarize_results_after_each_summary_async(self, raw_content):
-        contents = self._split_contents(raw_content)
-        final_summary = await self.summarize_each_result_async(contents)
-        return final_summary
+    # async def summarize_results_after_each_summary_async(self, raw_content):
+    #     contents = self.split_contents(raw_content)
+    #     final_summary = await self.summarize_each_result_async(contents)
+    #     return final_summary
