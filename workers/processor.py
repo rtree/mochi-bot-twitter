@@ -42,9 +42,14 @@ class Processor:
             - 続くツィート(検索結果の中で最も重要なトピックを10個投稿してください。同一URLから複数トピックでも構いません)
             　　*記事要約*
             　　*記事URL*
-        　　　  {self.config.TWITTER_DELIMITER}
             - 最後のツィート
                *締めのコメント*
+            - なお、続くツィートの例を以下に示します
+                **DeepSeek、米AI市場に挑戦する日本企業**
+
+                日本発のAI企業が低コストAIモデルで米大手に対抗。AIの新たな競争軸として「質より実用性」が重要になりそう。2025年、AI勢力の分布に変化が起きるかも？
+                https://opentools.ai/news
+        　　　  {self.config.TWITTER_DELIMITER}
             
             各ツィートの注意点は以下の通りです:
             - 投稿先はX(Twitter)なので、Markdownは使わず改行も行わないでください
