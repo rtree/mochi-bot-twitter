@@ -47,7 +47,7 @@ async def run_bot():
                 f_content_merged = f_content_file.read()
             with open(f'./.log/f_urls_{date_suffix}.log', 'r') as f_urls_file:
                 f_urls_merged = f_urls_file.read().splitlines()
-
+    
         processor = Processor(context, config)  # Instantiate Processor with context and config
         if config.PROCESSOR_DO_EACH_SUMMARY:
             f_content_split = processor.split_contents(f_content_merged)
