@@ -36,16 +36,16 @@ async def run_bot():
             # Save fetched content and URLs to log files
             os.makedirs('./.log', exist_ok=True)
             date_suffix = datetime.now().strftime("%Y-%m%d")
-            with open(f'./.log/f_content_merged_{date_suffix}.log', 'w') as f_content_file:
+            with open(f'./.log/f_nosum_{date_suffix}.log', 'w') as f_content_file:
                 f_content_file.write(f_content_merged)
-            with open(f'./.log/f_urls_merged_{date_suffix}.log', 'w') as f_urls_file:
+            with open(f'./.log/f_urls_{date_suffix}.log', 'w') as f_urls_file:
                 f_urls_file.write('\n'.join(f_urls_merged))
         else:
             # Read content and URLs from log files
             date_suffix = datetime.now().strftime("%Y-%m%d")
-            with open(f'./.log/f_content_merged_{date_suffix}.log', 'r') as f_content_file:
+            with open(f'./.log/f_nosum_{date_suffix}.log', 'r') as f_content_file:
                 f_content_merged = f_content_file.read()
-            with open(f'./.log/f_urls_merged_{date_suffix}.log', 'r') as f_urls_file:
+            with open(f'./.log/f_urls_{date_suffix}.log', 'r') as f_urls_file:
                 f_urls_merged = f_urls_file.read().splitlines()
 
         processor = Processor(context, config)  # Instantiate Processor with context and config
@@ -53,6 +53,10 @@ async def run_bot():
             f_content_split        =       processor.split_contents(f_content_merged)
             f_content_eachsummary  = await processor.summarize_each_result_async(f_content_split)
             summary                = await processor.summarize_results_async(f_content_eachsummary)
+
+            # Save each summary content to log file
+            with open(f'./.log/f_sum_{date_suffix}.log', 'w') as f_eachsummary_file:
+                f_eachsummary_file.write('\n'.join(f_content_eachsummary))
         else:
             summary = await processor.summarize_results_async(f_content_merged)
 
