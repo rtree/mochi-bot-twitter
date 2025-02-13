@@ -50,13 +50,13 @@ async def run_bot():
 
         processor = Processor(context, config)  # Instantiate Processor with context and config
         if config.PROCESSOR_DO_EACH_SUMMARY:
-            f_content_split        =       processor.split_contents(f_content_merged)
-            f_content_eachsummary  = await processor.summarize_each_result_async(f_content_split)
-            summary                = await processor.summarize_results_async(f_content_eachsummary)
+            f_content_split = processor.split_contents(f_content_merged)
+            f_content_eachsummary = await processor.summarize_each_result_async(f_content_split)
+            summary = await processor.summarize_results_async(f_content_eachsummary)
 
-            # Save each summary content to log file
+            # Join each summary content with newlines before writing to the log file
             with open(f'./.log/f_sum_{date_suffix}.log', 'w') as f_eachsummary_file:
-                f_eachsummary_file.write('\n'.join(f_content_eachsummary))
+                f_eachsummary_file.write(f_content_eachsummary)
         else:
             summary = await processor.summarize_results_async(f_content_merged)
 
