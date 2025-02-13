@@ -50,7 +50,7 @@ class Processor:
                 Intelの新GPU「Battlemage」が発表されたよ。性能よりコストパフォーマンスを重視し、VRAM容量で競争力を高めてるみたい。特に$250で12GB VRAM搭載のArc B580は興味深いね
                 https://gamersnexus.net/gpus/intel-arc-b580-battlemage-gpu-review-benchmarks-vs-nvidia-rtx-4060-amd-rx-7600-more
         　　　  {self.config.TWITTER_DELIMITER}
-            - なお、続くツィートの例をもうひとつ示します
+            - なお、続くツィートの例をもうひとつ示します。このように短い件名と空行を挟んで本文を投稿してください。件名は短ければ短いほどよく、本文はなるべく情報を詰め込んでください
                 **AIQT 2025**
 
                 パキスタンで「AIQT 2025」シンポジウムが開催され、AIと量子コンピューターの融合について議論が行われたよ。国際的な専門家が集まり、量子インターネットやAI駆動の量子回路などの開発動向が紹介されたんだって
@@ -62,7 +62,7 @@ class Processor:
             各ツィートの注意点は以下の通りです:
             - 投稿先はX(Twitter)なので、Markdownは使わず改行も行わないでください
             - 区切りは1記事ごと{self.config.TWITTER_DELIMITER}の区切り文字のみ。
-            - ツィートはURL分23文字含め、最長279文字
+            - ツィートはURL分23文字含め、最長279文字。URLは本体が何文字であっても23文字としてカウントしてください
             - 区切りは1記事ごと{self.config.TWITTER_DELIMITER}の区切り文字のみ。
 
             以下が要約対象の検索結果です:
