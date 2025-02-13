@@ -81,8 +81,7 @@ class Processor:
             self.config.logprint.info(f"summarie: \n{summary}\n")
             self.config.logprint.info("= End of summarize_each_result =====================================")
 
-        #final_summary = await self.summarize_results_async(" ".join(summaries))
-        return " ".join(summaries)
+        return "\n".join(summaries)
 
     def split_contents(self, raw_content):
         contents = raw_content.split(self.config.FETCHER_START_OF_CONTENT)
