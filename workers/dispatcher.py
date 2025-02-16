@@ -15,13 +15,13 @@ class Dispatcher:
 
     def post_to_twitter(self, content):
         tweets = content.split(self.config.TWITTER_DELIMITER)
-        trimmed_tweets = [tweet[:199] for tweet in tweets]
+        #tweets = [tweet[:199] for tweet in tweets]
 
         try:
-            first_tweet = self.twclient.create_tweet(text=trimmed_tweets[0])
+            first_tweet = self.twclient.create_tweet(text=tweets[0])
             self.config.logprint.info("First tweet posted successfully.")
 
-            for tweet in trimmed_tweets[1:]:
+            for tweet in tweets[1:]:
                 time.sleep(2)
                 self.twclient.create_tweet(text=tweet)
                 self.config.logprint.info("Other tweet posted successfully.")
