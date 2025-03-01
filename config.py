@@ -30,6 +30,8 @@ class Config:
     REDDIT_PASSWORD       = os.getenv('REDDIT_PASSWORD')
     REDDIT_SEARCH_RESULTS = 6
 
+    GROK_API_KEY          = os.getenv('GROK_API_KEY')
+
     HACKER_NEWS_COMMENTS  = 30
     HACKER_NEWS_POINTS    = 95
 
