@@ -15,12 +15,26 @@ class GrokFetcher:
         discIn = [{"role": "user", "content": msg}]
         self.context.extend(discIn)
 
+        p_src = (
+            f"""
+            {msg}
+
+            回答のフォーマットはこちら:
+            --- Start of content ---
+            Title: *ニュースの要約*
+            URL: *一番関係がありそうなxまたはx以外のサイトのURL*
+            SRC: X
+            Snippet:
+            *なるべく詳細なニュースの解説*
+            --- End   of content ---
+            """
+         )
+
         response = self.client.chat.completions.create(
             model="grok-2-latest",
             messages=[
                 {"role": "system", "content": "You are a social media analyst."},
-                {"role": "user", "content": msg},
-                {"role": "user", "content": "Please format the response as follows: Title, URL, and Snippet."}
+                {"role": "user", "content": p_src},
             ]
         )
         
