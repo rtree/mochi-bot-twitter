@@ -8,6 +8,6 @@ if __name__ == "__main__":
     context = deque(maxlen=config.OPENAI_HISTORY_LENGTH)  # Instantiate context
     fetcher = GrokFetcher(context, config)
     summaries, urls = asyncio.run(fetcher.fetch())
-    #print(summaries)  # Print summarized content from Grok
+    print(summaries)  # Print summarized content from Grok
     print(urls)       # Print extracted URLs
     print("Done.")    # Print completion message
