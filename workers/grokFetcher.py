@@ -23,7 +23,7 @@ class GrokFetcher:
             ]
         )
         
-        fetched_content = response.choices[0].message['content']
+        fetched_content = response.choices[0].message.content
         urls = self._extract_urls(fetched_content)
         
         return fetched_content, urls
