@@ -27,6 +27,9 @@ class GrokFetcher:
             Snippet:
             *なるべく詳細なニュースの解説*
             --- End   of content ---
+
+            please avoid hallucination, if you do not have the confidence of the news, please remove them from answer.
+
             """
          )
 
