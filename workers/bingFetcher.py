@@ -58,8 +58,8 @@ class BingFetcher:
             f"会話履歴を踏まえつつ、このテキストから会話の目的を最も達成する検索キーワードを抽出してください。"
             f"結果は検索キーワードのみを半角スペースで区切って出力してください。検索キーワードは英語で出力してください:{parsed_text}"
         )
-        # Use extend instead of concatenation
-        self.context.extend([{"role": "user", "content": prompt}])  # Add the new message to the deque
+        # Use extend to add the new message to the deque
+        self.context.extend([{"role": "user", "content": prompt}])
         response = self.aiclient.chat.completions.create(
             model=self.config.OPENAI_GPT_MODEL,
             messages=list(self.context)  # Convert deque to list for API call
