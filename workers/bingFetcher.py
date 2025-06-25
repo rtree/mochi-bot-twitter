@@ -9,7 +9,7 @@ from bs4 import BeautifulSoup
 from openai import OpenAI
 from azure.ai.agents import AgentsClient
 from azure.ai.agents.models import BingGroundingTool, AgentThreadCreationOptions, ListSortOrder
-from azure.identity import DefaultAzureCredential
+from azure.core.credentials import AzureKeyCredential
 
 class BingFetcher:
     def __init__(self, context, config):
@@ -75,7 +75,7 @@ class BingFetcher:
         if count is None:
             count = self.config.BING_SEARCH_RESULTS
 
-        credential = DefaultAzureCredential()
+        credential = AzureKeyCredential(self.config.AZURE_PROJECT_API_KEY)
         bing_tool = BingGroundingTool(
             connection_id=self.config.AZURE_BING_CONNECTION_ID,
             count=count,
