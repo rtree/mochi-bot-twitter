@@ -7,9 +7,7 @@ from PyPDF2 import PdfReader
 from io import BytesIO
 from bs4 import BeautifulSoup
 from openai import OpenAI
-from azure.ai.agents import AgentsClient
-from azure.ai.agents.models import BingGroundingTool, AgentThreadCreationOptions, ListSortOrder
-from azure.core.credentials import AzureKeyCredential
+
 
 class BingFetcher:
     def __init__(self, context, config):
@@ -39,8 +37,7 @@ class BingFetcher:
             "あなたはユーザーのプロンプトを分析し、主題、サブテーマ、関連キーワードを抽出するアシスタントです。"
             "会話履歴を分析し、直近のユーザ入力への回答を満たす主題、サブテーマ、関連キーワードを抽出してください。英語で出力してください"
         )
-        # Use extend instead of concatenation
-        messages = list(self.context)  # Convert deque to list
+        messages = list(self.context)
         messages.append({"role": "user", "content": prompt})
         response = self.aiclient.chat.completions.create(
             model=self.config.OPENAI_GPT_MODEL,
@@ -58,11 +55,10 @@ class BingFetcher:
             f"会話履歴を踏まえつつ、このテキストから会話の目的を最も達成する検索キーワードを抽出してください。"
             f"結果は検索キーワードのみを半角スペースで区切って出力してください。検索キーワードは英語で出力してください:{parsed_text}"
         )
-        # Use extend to add the new message to the deque
         self.context.extend([{"role": "user", "content": prompt}])
         response = self.aiclient.chat.completions.create(
             model=self.config.OPENAI_GPT_MODEL,
-            messages=list(self.context)  # Convert deque to list for API call
+            messages=list(self.context)
         )
         content = response.choices[0].message.content
         self.config.logprint.info("= extract_keywords ============================================")
@@ -71,51 +67,7 @@ class BingFetcher:
         return content
 
     def _search_bing(self, query, count=None):
-        count = count or self.config.BING_SEARCH_RESULTS
-
-        credential = AzureKeyCredential(self.config.AZURE_PROJECT_API_KEY)
-        client = AgentsClient(endpoint=self.config.AZURE_PROJECT_ENDPOINT, credential=credential)
-
-        bing_tool = BingGroundingTool(
-            connection_id=self.config.AZURE_BING_CONNECTION_ID,
-            count=count
-        )
-
-        agent = client.create_agent(
-            model=self.config.OPENAI_GPT_MODEL,
-            name="bing-agent",
-            instructions="You are a search assistant.",
-            tools=bing_tool.definitions
-        )
-
-        thread = AgentThreadCreationOptions(messages=[{"role": "user", "content": query}])
-        run = client.create_thread_and_run(agent_id=agent.id, thread=thread)
-
-        while run.status not in ["completed", "failed", "canceled", "cancelled"]:
-            time.sleep(1)
-            run = client.runs.get(run_id=run.id, thread_id=run.thread_id)
-
-        messages = list(client.messages.list(thread_id=run.thread_id, order=ListSortOrder.ASCENDING))
-
-        search_data = {"webPages": {"value": []}, "urls": []}
-        for msg in messages:
-            if msg.role != "agent":
-                continue
-            text_content = "\n".join(t.text.value for t in msg.text_messages)
-            for ann in msg.url_citation_annotations or []:
-                url = ann.url_citation.url
-                title = ann.url_citation.title or ""
-                search_data["webPages"]["value"].append({"name": title, "url": url, "snippet": text_content})
-                search_data["urls"].append(url)
-
-        self.config.logprint.info("Bing Search Results:")
-        for result in search_data["webPages"]["value"][:count]:
-            self.config.logprint.info(f"Title: {result['name']}")
-            self.config.logprint.info(f"URL: {result['url']}")
-            self.config.logprint.info(f"Snippet: {result['snippet']}")
-            self.config.logprint.info("---")
-
-        return search_data
+        return simulate_bing_grounding_via_rest(query, self.config)
 
     async def _summarize_results_with_pages_async(self, search_results):
         content_list = []
@@ -165,6 +117,77 @@ class BingFetcher:
                 self.config.elogprint.error(f"Error fetching {url}: {str(e)}")
                 return None, "Error"
 
-        content, ctype = await asyncio.to_thread(blocking_fetch)
-        return content, ctype
+        return await asyncio.to_thread(blocking_fetch)
 
+
+def simulate_bing_grounding_via_rest(query, config):
+    endpoint = config.AZURE_PROJECT_ENDPOINT.rstrip("/")
+    api_key = config.AZURE_PROJECT_API_KEY
+    agent_id = config.AZURE_AGENT_ID
+    api_version = "2024-05-15-preview"
+
+    headers = {
+        "api-key": api_key,
+        "Content-Type": "application/json"
+    }
+
+    # 1. Create thread
+    thread_resp = requests.post(f"{endpoint}/threads?api-version={api_version}", headers=headers)
+    thread_resp.raise_for_status()
+    thread_id = thread_resp.json()["id"]
+
+    # 2. Add message
+    msg_resp = requests.post(
+        f"{endpoint}/threads/{thread_id}/messages?api-version={api_version}",
+        headers=headers,
+        json={"role": "user", "content": query}
+    )
+    msg_resp.raise_for_status()
+
+    # 3. Run agent
+    run_resp = requests.post(
+        f"{endpoint}/threads/{thread_id}/runs?api-version={api_version}",
+        headers=headers,
+        json={"assistant_id": agent_id}
+    )
+    run_resp.raise_for_status()
+    run_id = run_resp.json()["id"]
+
+    # 4. Poll status
+    while True:
+        status_resp = requests.get(
+            f"{endpoint}/threads/{thread_id}/runs/{run_id}?api-version={api_version}",
+            headers=headers
+        )
+        status_resp.raise_for_status()
+        if status_resp.json()["status"] in ["succeeded", "failed", "cancelled"]:
+            break
+        time.sleep(1)
+
+    # 5. Fetch messages
+    messages_resp = requests.get(
+        f"{endpoint}/threads/{thread_id}/messages?api-version={api_version}",
+        headers=headers
+    )
+    messages_resp.raise_for_status()
+    messages = messages_resp.json().get("value", [])
+
+    # 6. Parse Bing citations
+    search_data = {"webPages": {"value": []}, "urls": []}
+    for msg in messages:
+        if msg["role"] != "assistant":
+            continue
+        text_content = msg.get("content", "")
+        annotations = msg.get("annotations", [])
+        for ann in annotations:
+            if ann.get("type") == "citation":
+                url = ann.get("url")
+                title = ann.get("title", "")
+                search_data["webPages"]["value"].append({
+                    "name": title,
+                    "url": url,
+                    "snippet": text_content
+                })
+                search_data["urls"].append(url)
+
+    return search_data

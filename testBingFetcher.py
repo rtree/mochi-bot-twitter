@@ -1,3 +1,4 @@
+#testBingFetcher.py
 from collections import deque
 from config import Config
 from workers.bingFetcher import BingFetcher
