@@ -39,7 +39,9 @@ class BingFetcher:
             "あなたはユーザーのプロンプトを分析し、主題、サブテーマ、関連キーワードを抽出するアシスタントです。"
             "会話履歴を分析し、直近のユーザ入力への回答を満たす主題、サブテーマ、関連キーワードを抽出してください。英語で出力してください"
         )
-        messages = self.context + [{"role": "user", "content": prompt}]
+        # Use extend instead of concatenation
+        messages = list(self.context)  # Convert deque to list
+        messages.append({"role": "user", "content": prompt})
         response = self.aiclient.chat.completions.create(
             model=self.config.OPENAI_GPT_MODEL,
             messages=messages
