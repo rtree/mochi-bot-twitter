@@ -10,3 +10,5 @@ pycryptodome
 tweepy
 pandas
 feedparser
+azure-ai-agents
+azure-identity
