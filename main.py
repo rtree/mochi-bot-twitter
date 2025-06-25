@@ -26,10 +26,12 @@ async def run_bot():
                        ]
 
             for fetcher in fetchers:
+                config.logprint.info(f"Starting fetcher: {fetcher.__class__.__name__}")
                 try:
                     fetched_content, urls = await fetcher.fetch()
                     f_content_merged += fetched_content + "\n\n"
                     f_urls_merged.extend(urls)
+                    config.logprint.info(f"Fetcher {fetcher.__class__.__name__} completed successfully.")
                 except Exception as e:
                     config.elogprint.error(f"Error in fetcher {fetcher.__class__.__name__}: {str(e)}")
 
@@ -50,23 +52,35 @@ async def run_bot():
         
         processor = Processor(context, config)  # Instantiate Processor with context and config
         if config.PROCESSOR_DO_EACH_SUMMARY:
+            config.logprint.info("Starting content splitting...")
             f_content_split = processor.split_contents(f_content_merged)
+            config.logprint.info("Content splitting completed.")
+
+            config.logprint.info("Starting summarization for each result...")
             f_content_eachsummary = await processor.summarize_each_result_async(f_content_split)
+            config.logprint.info("Summarization for each result completed.")
+
+            config.logprint.info("Starting final summarization...")
             summary = await processor.summarize_results_async(f_content_eachsummary)
+            config.logprint.info("Final summarization completed.")
 
             # Join each summary content with newlines before writing to the log file
             with open(f'./.log/f_sum_{date_suffix}.log', 'w') as f_eachsummary_file:
                 f_eachsummary_file.write(f_content_eachsummary)
         else:
+            config.logprint.info("Starting summarization...")
             summary = await processor.summarize_results_async(f_content_merged)
+            config.logprint.info("Summarization completed.")
 
         context.append({"role": "assistant", "content": summary})
         config.logprint.info("-Agent summary--------------------------------------------------------------")
         config.logprint.info(f"  Response content:'{summary}'")
 
         if config.TWITTER_DO_TWEET:
+            config.logprint.info("Starting Twitter posting...")
             dispatcher = Dispatcher(config)  # Instantiate Dispatcher with config
             dispatcher.post_to_twitter(summary)
+            config.logprint.info("Twitter posting completed.")
 
     except Exception as e:
         config.elogprint.error(f"API Call Error: {str(e)}")

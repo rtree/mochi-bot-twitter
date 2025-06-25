@@ -81,7 +81,8 @@ class Processor:
 
     async def summarize_each_result_async(self, contents):
         summaries = []
-        for content in contents:
+        for idx, content in enumerate(contents):
+            self.config.logprint.info(f"Starting summarization for content {idx + 1}/{len(contents)}...")
             p_src = (
                 f"""あなたは著名テクノロジー企業の創業者です。あなたは以下の内容を要約してください。
                 要約は、会話履歴を踏まえつつ私が知りたいことの主旨を把握の上で作ってください。
@@ -111,12 +112,14 @@ class Processor:
                     messages=messages
                 )
 
-            response = await asyncio.to_thread(blocking_chat_completion)
-            summary = response.choices[0].message.content
-            summaries.append(summary)
-            self.config.logprint.info("= summarize_each_result ============================================")
-            self.config.logprint.info(f"summarie: \n{summary}\n")
-            self.config.logprint.info("= End of summarize_each_result =====================================")
+            try:
+                response = await asyncio.to_thread(blocking_chat_completion)
+                summary = response.choices[0].message.content
+                summaries.append(summary)
+                self.config.logprint.info(f"Summarization for content {idx + 1}/{len(contents)} completed.")
+            except Exception as e:
+                self.config.elogprint.error(f"Error summarizing content {idx + 1}/{len(contents)}: {str(e)}")
+                summaries.append(f"{self.config.FETCHER_START_OF_CONTENT}\nTitle: Error\nSnippet: Unable to summarize due to error.\n{self.config.FETCHER_END_OF_CONTENT}\n")
 
         return "\n".join(summaries)
 

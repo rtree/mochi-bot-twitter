@@ -19,99 +19,94 @@ class BingFetcher:
         self.srcname = "Bing"
 
     async def fetch(self):
-        #msg = f"今日のニュースをまとめて。今日は ({datetime.today().strftime('%Y-%m-%d')}) です。ジャンルは経済・テクノロジーでお願いします。検索する場合はニュースの期間指定もお願いします"
         msg = f"今日のニュースをまとめて。今日は ({datetime.today().strftime('%Y-%m-%d')}) です。ジャンルは経済・テクノロジーでお願いします。目先の細かな動きよりも、世の中を大きく動かす可能性があるものやインパクトが大きいものを知りたいです。"
-        img_url = None
         self.config.logprint.info("-User input------------------------------------------------------------------")
         self.config.logprint.info(f"  Message content: '{msg}'")
-        discIn = []
-        discIn.append({"role": "user", "content": msg})
-        self.context.extend(discIn)
+        self.context.extend([{"role": "user", "content": msg}])
 
-        parsed_result  = self._parse_prompt()
-        keywords       = self._extract_keywords(parsed_result)
+        parsed_result = self._parse_prompt()
+        keywords = self._extract_keywords(parsed_result)
         self.config.logprint.info(f"keyword: {keywords}")
+
         search_results = self._search_bing(keywords)
         fetched = await self._summarize_results_with_pages_async(search_results)
 
-        # Extract URLs from search results
         urls = [result['url'] for result in search_results.get('webPages', {}).get('value', [])]
-
         return fetched, urls
 
     def _parse_prompt(self):
-        p_src = f"あなたはユーザーのプロンプトを分析し、主題、サブテーマ、関連キーワードを抽出するアシスタントです。"
-        p_src = f"{p_src} 会話履歴を分析し、直近のユーザ入力への回答を満たす主題、サブテーマ、関連キーワードを抽出してください。英語で出力してください"
-        messages = []
-        messages.extend(self.context)
-        messages.append({"role": "user", "content": f"{p_src}"})
+        prompt = (
+            "あなたはユーザーのプロンプトを分析し、主題、サブテーマ、関連キーワードを抽出するアシスタントです。"
+            "会話履歴を分析し、直近のユーザ入力への回答を満たす主題、サブテーマ、関連キーワードを抽出してください。英語で出力してください"
+        )
+        messages = self.context + [{"role": "user", "content": prompt}]
         response = self.aiclient.chat.completions.create(
             model=self.config.OPENAI_GPT_MODEL,
             messages=messages
         )
+        content = response.choices[0].message.content
         self.config.logprint.info("= parse_prompt ============================================")
-        self.config.logprint.info(f"response: {response.choices[0].message.content}")
+        self.config.logprint.info(f"response: {content}")
         self.config.logprint.info("= End of parse_prompt =====================================")
-
-        return response.choices[0].message.content
+        return content
 
     def _extract_keywords(self, parsed_text):
-        p_src = f"あなたは解析されたプロンプト情報から簡潔な検索キーワードを抽出します。"
-        p_src = f"会話履歴を踏まえつつ、このテキストから会話の目的を最も達成する検索キーワードを抽出してください。結果は検索キーワードのみを半角スペースで区切って出力してください。検索キーワードは英語で出力してください:{parsed_text}"
-        messages = []
-        messages.extend(self.context)
-        messages.append({"role": "user", "content": f"{p_src}"})
+        prompt = (
+            f"あなたは解析されたプロンプト情報から簡潔な検索キーワードを抽出します。"
+            f"会話履歴を踏まえつつ、このテキストから会話の目的を最も達成する検索キーワードを抽出してください。"
+            f"結果は検索キーワードのみを半角スペースで区切って出力してください。検索キーワードは英語で出力してください:{parsed_text}"
+        )
+        messages = self.context + [{"role": "user", "content": prompt}]
         response = self.aiclient.chat.completions.create(
             model=self.config.OPENAI_GPT_MODEL,
             messages=messages
         )
+        content = response.choices[0].message.content
         self.config.logprint.info("= extract_keywords ============================================")
-        self.config.logprint.info(f"response: {response.choices[0].message.content}")
+        self.config.logprint.info(f"response: {content}")
         self.config.logprint.info("= End of extract_keywords =====================================")
-
-        return response.choices[0].message.content
+        return content
 
     def _search_bing(self, query, count=None):
-        if count is None:
-            count = self.config.BING_SEARCH_RESULTS
+        count = count or self.config.BING_SEARCH_RESULTS
 
         credential = AzureKeyCredential(self.config.AZURE_PROJECT_API_KEY)
+        client = AgentsClient(endpoint=self.config.AZURE_PROJECT_ENDPOINT, credential=credential)
+
         bing_tool = BingGroundingTool(
             connection_id=self.config.AZURE_BING_CONNECTION_ID,
-            count=count,
+            count=count
         )
 
-        with AgentsClient(endpoint=self.config.AZURE_PROJECT_ENDPOINT, credential=credential) as client:
-            agent = client.create_agent(
-                model=self.config.OPENAI_GPT_MODEL,
-                name="bing-agent",
-                instructions="You are a search assistant",
-                tools=bing_tool.definitions,
-            )
+        agent = client.create_agent(
+            model=self.config.OPENAI_GPT_MODEL,
+            name="bing-agent",
+            instructions="You are a search assistant.",
+            tools=bing_tool.definitions
+        )
 
-            thread = AgentThreadCreationOptions(messages=[{"role": "user", "content": query}])
-            run = client.create_thread_and_run(agent_id=agent.id, thread=thread)
+        thread = AgentThreadCreationOptions(messages=[{"role": "user", "content": query}])
+        run = client.create_thread_and_run(agent_id=agent.id, thread=thread)
 
-            while run.status not in ["completed", "failed", "canceled", "cancelled"]:
-                time.sleep(1)
-                run = client.runs.get(run_id=run.id, thread_id=run.thread_id)
+        while run.status not in ["completed", "failed", "canceled", "cancelled"]:
+            time.sleep(1)
+            run = client.runs.get(run_id=run.id, thread_id=run.thread_id)
 
-            messages = list(client.messages.list(thread_id=run.thread_id, order=ListSortOrder.ASCENDING))
+        messages = list(client.messages.list(thread_id=run.thread_id, order=ListSortOrder.ASCENDING))
 
         search_data = {"webPages": {"value": []}, "urls": []}
         for msg in messages:
             if msg.role != "agent":
                 continue
             text_content = "\n".join(t.text.value for t in msg.text_messages)
-            if msg.url_citation_annotations:
-                for ann in msg.url_citation_annotations:
-                    url = ann.url_citation.url
-                    title = ann.url_citation.title or ""
-                    search_data["webPages"]["value"].append({"name": title, "url": url, "snippet": text_content})
-                    search_data["urls"].append(url)
+            for ann in msg.url_citation_annotations or []:
+                url = ann.url_citation.url
+                title = ann.url_citation.title or ""
+                search_data["webPages"]["value"].append({"name": title, "url": url, "snippet": text_content})
+                search_data["urls"].append(url)
 
         self.config.logprint.info("Bing Search Results:")
-        for result in search_data.get('webPages', {}).get('value', [])[:count]:
+        for result in search_data["webPages"]["value"][:count]:
             self.config.logprint.info(f"Title: {result['name']}")
             self.config.logprint.info(f"URL: {result['url']}")
             self.config.logprint.info(f"Snippet: {result['snippet']}")
@@ -121,16 +116,19 @@ class BingFetcher:
 
     async def _summarize_results_with_pages_async(self, search_results):
         content_list = []
-        web_results = search_results.get('webPages', {}).get('value', [])[:self.config.BING_SEARCH_RESULTS]
-        tasks = [self._fetch_page_content_async(r['url']) for r in web_results]
+        web_results = search_results.get("webPages", {}).get("value", [])[:self.config.BING_SEARCH_RESULTS]
+        tasks = [self._fetch_page_content_async(r["url"]) for r in web_results]
         pages = await asyncio.gather(*tasks, return_exceptions=True)
-        for (r, page_result) in zip(web_results, pages):
-            title = r['name']
-            snippet = r['snippet']
-            url = r['url']
+
+        for r, page_result in zip(web_results, pages):
+            title = r["name"]
+            snippet = r["snippet"]
+            url = r["url"]
+
             if isinstance(page_result, Exception):
                 content_list.append(f"{self.config.FETCHER_START_OF_CONTENT}\nタイトル: {title}\nURL: {url}\nスニペット:\n{snippet}\nSRC: {self.srcname}\n{self.config.FETCHER_END_OF_CONTENT}\n")
                 continue
+
             page_content, content_type = page_result
             if content_type in ("HTML", "PDF") and page_content:
                 content_list.append(f"{self.config.FETCHER_START_OF_CONTENT}\nタイトル: {title}\nURL: {url}\n内容:\n{page_content}\nSRC: {self.srcname}\n{self.config.FETCHER_END_OF_CONTENT}\n")
