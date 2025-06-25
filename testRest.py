@@ -1,59 +1,48 @@
-# testRest.py
-import os
-import requests
-from dotenv import load_dotenv
+# azure_rest_sample.py
+import time, requests, json, os
+from dotenv import load_dotenv          # ← 追加
 
-# Load env values
+# 1) .env をロード（現在の作業ディレクトリ or 指定パスから）
 load_dotenv()
 
-api_key = os.getenv("AZURE_PROJECT_API_KEY")
-endpoint = os.getenv("AZURE_PROJECT_ENDPOINT").rstrip("/")
-agent_id = os.getenv("AZURE_AGENT_ID")
-api_version = "2024-05-15-preview"
+# 2) 環境変数を取得
+ENDPOINT = os.getenv("AZURE_PROJECT_ENDPOINT").rstrip("/")
+API_KEY  = os.getenv("AZURE_PROJECT_API_KEY")
+AGENT_ID = os.getenv("AZURE_AGENT_ID")
 
-headers = {
-    "api-key": api_key,
-    "Content-Type": "application/json"
-}
+if not (ENDPOINT and API_KEY and AGENT_ID):
+    raise RuntimeError(".env に ENDPOINT / API_KEY / AGENT_ID が設定されていません")
 
-def run_agent():
-    # Step 1: Create a thread
-    thread_resp = requests.post(f"{endpoint}/threads?api-version={api_version}", headers=headers)
-    thread_resp.raise_for_status()
-    thread_id = thread_resp.json()["id"]
-    print("✅ Thread ID:", thread_id)
+HEADERS = {"api-key": API_KEY, "Content-Type": "application/json"}
 
-    # Step 2: Post user message
-    message = {"role": "user", "content": "Summarize today's top tech and economy news"}
-    msg_resp = requests.post(f"{endpoint}/threads/{thread_id}/messages?api-version={api_version}", headers=headers, json=message)
-    msg_resp.raise_for_status()
+def create_run(prompt: str):
+    url = f"{ENDPOINT}/threads/runs?api-version=v1"
+    body = {
+        "assistant_id": AGENT_ID,
+        "thread": {"messages": [{"role": "user", "content": prompt}]}
+    }
+    res = requests.post(url, headers=HEADERS, json=body, timeout=30)
+    res.raise_for_status()
+    j = res.json()
+    return j["thread_id"], j["id"]
 
-    # Step 3: Run agent
-    run_body = {"assistant_id": agent_id}
-    run_resp = requests.post(f"{endpoint}/threads/{thread_id}/runs?api-version={api_version}", headers=headers, json=run_body)
-    run_resp.raise_for_status()
-    run_id = run_resp.json()["id"]
-    print("⏳ Run ID:", run_id)
-
-    # Step 4: Poll for completion
+def wait_run(thread_id, run_id):
+    url = f"{ENDPOINT}/threads/{thread_id}/runs/{run_id}?api-version=v1"
     while True:
-        status_resp = requests.get(f"{endpoint}/threads/{thread_id}/runs/{run_id}?api-version={api_version}", headers=headers)
-        status_resp.raise_for_status()
-        status = status_resp.json()["status"]
-        print("  Run status:", status)
-        if status in ["succeeded", "failed", "cancelled"]:
-            break
+        j = requests.get(url, headers=HEADERS, timeout=15).json()
+        if j["status"] in ("completed", "failed", "cancelled"):
+            return j["status"]
+        time.sleep(1)
 
-    # Step 5: Get agent messages
-    messages_resp = requests.get(f"{endpoint}/threads/{thread_id}/messages?api-version={api_version}", headers=headers)
-    messages_resp.raise_for_status()
-    messages = messages_resp.json().get("value", [])
-    for m in messages:
-        if m["role"] == "assistant":
-            print("\n🤖 Assistant reply:\n", m["content"])
-            if "annotations" in m:
-                for ann in m["annotations"]:
-                    print("📎 Citation:", ann.get("url"))
+def list_messages(thread_id):
+    url = f"{ENDPOINT}/threads/{thread_id}/messages?api-version=v1"
+    return requests.get(url, headers=HEADERS, timeout=15).json()["data"]
 
 if __name__ == "__main__":
-    run_agent()
+    prompt = "今日のニュースをまとめて。今日は (2025-06-25) です。ジャンルは経済・テクノロジーでお願いします。"
+    tid, rid = create_run(prompt)
+    status = wait_run(tid, rid)
+    if status == "completed":
+        for m in list_messages(tid):
+            if m["role"] == "assistant":
+                print(m["content"]["text"]["value"])
