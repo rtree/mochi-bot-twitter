@@ -1,11 +1,15 @@
 import asyncio
 import base64
 import requests
+import time
 from datetime import datetime
 from PyPDF2 import PdfReader
 from io import BytesIO
 from bs4 import BeautifulSoup
 from openai import OpenAI
+from azure.ai.agents import AgentsClient
+from azure.ai.agents.models import BingGroundingTool, AgentThreadCreationOptions, ListSortOrder
+from azure.core.credentials import AzureKeyCredential
 
 class BingFetcher:
     def __init__(self, context, config):
@@ -70,14 +74,41 @@ class BingFetcher:
     def _search_bing(self, query, count=None):
         if count is None:
             count = self.config.BING_SEARCH_RESULTS
-        url = "https://api.bing.microsoft.com/v7.0/search"
-        headers = {"Ocp-Apim-Subscription-Key": self.config.BING_API_KEY}
-        params = {"q": query, "count": count, "setLang": "en", "mkt": "ja-JP", "freshness": "Week"}
 
-        response = requests.get(url, headers=headers, params=params)
-        response.raise_for_status()
-        search_data = response.json()
-        search_data['urls'] = [result['url'] for result in search_data.get('webPages', {}).get('value', [])[:self.config.BING_SEARCH_RESULTS]]
+        credential = AzureKeyCredential(self.config.AZURE_PROJECT_API_KEY)
+        bing_tool = BingGroundingTool(
+            connection_id=self.config.AZURE_BING_CONNECTION_ID,
+            count=count,
+        )
+
+        with AgentsClient(endpoint=self.config.AZURE_PROJECT_ENDPOINT, credential=credential) as client:
+            agent = client.create_agent(
+                model=self.config.OPENAI_GPT_MODEL,
+                name="bing-agent",
+                instructions="You are a search assistant",
+                tools=bing_tool.definitions,
+            )
+
+            thread = AgentThreadCreationOptions(messages=[{"role": "user", "content": query}])
+            run = client.create_thread_and_run(agent_id=agent.id, thread=thread)
+
+            while run.status not in ["completed", "failed", "canceled", "cancelled"]:
+                time.sleep(1)
+                run = client.runs.get(run_id=run.id, thread_id=run.thread_id)
+
+            messages = list(client.messages.list(thread_id=run.thread_id, order=ListSortOrder.ASCENDING))
+
+        search_data = {"webPages": {"value": []}, "urls": []}
+        for msg in messages:
+            if msg.role != "agent":
+                continue
+            text_content = "\n".join(t.text.value for t in msg.text_messages)
+            if msg.url_citation_annotations:
+                for ann in msg.url_citation_annotations:
+                    url = ann.url_citation.url
+                    title = ann.url_citation.title or ""
+                    search_data["webPages"]["value"].append({"name": title, "url": url, "snippet": text_content})
+                    search_data["urls"].append(url)
 
         self.config.logprint.info("Bing Search Results:")
         for result in search_data.get('webPages', {}).get('value', [])[:count]:
@@ -85,6 +116,7 @@ class BingFetcher:
             self.config.logprint.info(f"URL: {result['url']}")
             self.config.logprint.info(f"Snippet: {result['snippet']}")
             self.config.logprint.info("---")
+
         return search_data
 
     async def _summarize_results_with_pages_async(self, search_results):
