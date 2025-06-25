@@ -77,20 +77,11 @@ class BingFetcher:
         credential = AzureKeyCredential(self.config.AZURE_PROJECT_API_KEY)
         client = AgentsClient(endpoint=self.config.AZURE_PROJECT_ENDPOINT, credential=credential)
 
-        bing_tool = BingGroundingTool(
-            connection_id=self.config.AZURE_BING_CONNECTION_ID,
-            count=count
-        )
-
-        agent = client.create_agent(
-            model=self.config.OPENAI_GPT_MODEL,
-            name="bing-agent",
-            instructions="You are a search assistant.",
-            tools=bing_tool.definitions
-        )
+        # Use predefined agent ID from configuration
+        predefined_agent_id = self.config.AZURE_AGENT_ID
 
         thread = AgentThreadCreationOptions(messages=[{"role": "user", "content": query}])
-        run = client.create_thread_and_run(agent_id=agent.id, thread=thread)
+        run = client.create_thread_and_run(agent_id=predefined_agent_id, thread=thread)
 
         while run.status not in ["completed", "failed", "canceled", "cancelled"]:
             time.sleep(1)
