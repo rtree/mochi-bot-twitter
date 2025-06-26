@@ -92,7 +92,7 @@ class BingFetcher:
         predefined_agent_id = self.config.AZURE_AGENT_ID
 
         # Add instruction to the query
-        instructional_query = f"Please search for the following keywords and provide the results: {query}"
+        instructional_query = f"Please search for the following keywords and provide the results, including the source URLs for each piece of information: {query}"
 
         thread = AgentThreadCreationOptions(messages=[{"role": "user", "content": instructional_query}])
         run = client.create_thread_and_run(agent_id=predefined_agent_id, thread=thread)
