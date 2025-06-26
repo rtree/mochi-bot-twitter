@@ -82,7 +82,9 @@ class BingFetcher:
         return content
 
     def _search_bing(self, query, count=None):
+        self.config.logprint.info("start _search_bing=========================:")
         count = count or self.config.BING_SEARCH_RESULTS
+
 
         if self.config.AZURE_CLIENT_ID:
             os.environ["AZURE_CLIENT_ID"] = self.config.AZURE_CLIENT_ID
