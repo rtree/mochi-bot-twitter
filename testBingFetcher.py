@@ -1,4 +1,4 @@
-#testBingFetcher.py
+# testBingFetcher.py
 from collections import deque
 from config import Config
 from workers.bingFetcher import BingFetcher
@@ -10,7 +10,7 @@ if __name__ == "__main__":
     fetcher = BingFetcher(context, config)
     summaries, urls = asyncio.run(fetcher.fetch())
     # Print summarized Bing search results
-    print(summaries)  
+    print(summaries)
     # Print extracted URLs from Bing search results
-    print(urls)       
-    print("Done.")    # Print completion message
+    print(urls)
+    print("Done.")  # Print completion message
