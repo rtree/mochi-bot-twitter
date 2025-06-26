@@ -14,6 +14,7 @@ from openai import OpenAI
 from azure.ai.agents import AgentsClient
 from azure.ai.agents.models import BingGroundingTool, AgentThreadCreationOptions, ListSortOrder
 from azure.identity import DefaultAzureCredential
+import urllib.parse
 
 class BingFetcher:
     def __init__(self, context, config):
@@ -97,64 +98,59 @@ class BingFetcher:
             run = client.runs.get(run_id=run.id, thread_id=run.thread_id)
 
         search_data = {"webPages": {"value": []}, "urls": []}
-
-        # Get source URLs from message annotations, as per the documentation
-        messages = client.threads.list_messages(thread_id=run.thread_id)
-        for message in messages.data:  # Default order is descending (latest first)
-            if message.role == "assistant":
-                for content_item in message.content:
-                    if content_item.type == "text":
-                        for annotation in content_item.text.annotations:
-                            if annotation.type == 'url_citation':
-                                citation = getattr(annotation, 'url_citation', None)
-                                if citation:
-                                    url = getattr(citation, 'url', None)
-                                    title = getattr(citation, 'title', '')
-                                    if url:
-                                        search_data["webPages"]["value"].append({
-                                            "name": title,
-                                            "url": url,
-                                            "snippet": ""  # Snippet is not available via annotations
-                                        })
-                                        search_data["urls"].append(url)
-                if search_data["webPages"]["value"]:
-                    break  # Stop after processing the first (latest) assistant message with citations
-
-        # Get Bing search query URL from run steps
+        bing_query_url = None
         run_steps = client.runs.list_steps(run_id=run.id, thread_id=run.thread_id)
 
+        # Dump raw run_steps for debugging
         try:
-            run_steps_list = list(run_steps)
-            self.config.logprint.info(f"Raw run_steps: {[repr(s) for s in run_steps_list]}")
+            run_steps_dict = [step.to_dict() for step in run_steps]
+            self.config.logprint.info(f"Raw run_steps JSON: {json.dumps(run_steps_dict, indent=2)}")
         except Exception as e:
             self.config.elogprint.error(f"Could not serialize run_steps for debugging: {e}")
-            run_steps_list = list(client.runs.list_steps(run_id=run.id, thread_id=run.thread_id))
 
-        bing_search_url = ""
-        for step in run_steps_list:
-            if step.type == "tool_calls" and step.step_details and step.step_details.tool_calls:
+        # 1. Bing検索クエリURLの抽出
+        for step in run_steps:
+            if hasattr(step, "step_details") and step.step_details and hasattr(step.step_details, "tool_calls") and step.step_details.tool_calls:
                 for tool_call in step.step_details.tool_calls:
-                    if tool_call.type == 'bing_grounding':
-                        bg = getattr(tool_call, 'bing_grounding', None)
-                        if bg and hasattr(bg, 'requesturl'):
-                            request_url = bg.requesturl
-                            parsed_url = urlparse(request_url)
-                            query_params = parse_qs(parsed_url.query)
-                            if 'q' in query_params:
-                                search_query = unquote(query_params['q'][0])
-                                bing_search_url = f"https://www.bing.com/search?q={search_query}"
-                                self.config.logprint.info(f"Bing Search URL: {bing_search_url}")
-                                break
-            if bing_search_url:
-                break
+                    # Bing GroundingのリクエストURLを取得
+                    if hasattr(tool_call, "bing") and tool_call.bing and hasattr(tool_call.bing, "requesturl") and tool_call.bing.requesturl:
+                        try:
+                            parsed = urllib.parse.urlparse(tool_call.bing.requesturl)
+                            qs = urllib.parse.parse_qs(parsed.query)
+                            q = qs.get("q", [""])[0]
+                            q = urllib.parse.unquote(q)
+                            bing_query_url = f"https://www.bing.com/search?q={urllib.parse.quote(q)}"
+                            self.config.logprint.info(f"Bing Query URL: {bing_query_url}")
+                        except Exception as e:
+                            self.config.elogprint.error(f"Failed to extract Bing query URL: {e}")
 
-        self.config.logprint.info("Bing Search Results from Message Annotations:")
+        # 2. 検索結果の抽出
+        for step in run_steps:
+            if hasattr(step, "step_details") and step.step_details and hasattr(step.step_details, "tool_calls") and step.step_details.tool_calls:
+                for tool_call in step.step_details.tool_calls:
+                    if hasattr(tool_call, "bing") and tool_call.bing and hasattr(tool_call.bing, "output") and tool_call.bing.output:
+                        try:
+                            tool_output = json.loads(tool_call.bing.output)
+                            for result in tool_output.get("results", []):
+                                if result.get("url"):
+                                    search_data["webPages"]["value"].append({
+                                        "name": result.get("title", ""),
+                                        "url": result.get("url", ""),
+                                        "snippet": result.get("snippet", "")
+                                    })
+                                    search_data["urls"].append(result.get("url"))
+                        except json.JSONDecodeError:
+                            self.config.elogprint.error("Failed to decode Bing tool output JSON.")
+
+        self.config.logprint.info("Bing Search Results from Tool Output:")
         for result in search_data["webPages"]["value"][:count]:
             self.config.logprint.info(f"Title: {result['name']}")
             self.config.logprint.info(f"URL: {result['url']}")
             self.config.logprint.info(f"Snippet: {result['snippet']}")
             self.config.logprint.info("---")
 
+        # 3. Bing検索クエリURLも返却
+        search_data["bing_query_url"] = bing_query_url
         return search_data
 
     async def _summarize_results_with_pages_async(self, search_results):
