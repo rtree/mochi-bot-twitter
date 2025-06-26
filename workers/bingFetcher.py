@@ -4,6 +4,7 @@ import base64
 import os
 import requests
 import time
+import json
 from datetime import datetime
 from PyPDF2 import PdfReader
 from io import BytesIO
@@ -75,7 +76,6 @@ class BingFetcher:
     def _search_bing(self, query, count=None):
         count = count or self.config.BING_SEARCH_RESULTS
 
-        # Ensure service principal credentials are available for DefaultAzureCredential
         if self.config.AZURE_CLIENT_ID:
             os.environ["AZURE_CLIENT_ID"] = self.config.AZURE_CLIENT_ID
         if self.config.AZURE_CLIENT_SECRET:
@@ -83,38 +83,39 @@ class BingFetcher:
         if self.config.AZURE_TENANT_ID:
             os.environ["AZURE_TENANT_ID"] = self.config.AZURE_TENANT_ID
 
-        # Authenticate using DefaultAzureCredential which supports service principal
-        # or other Azure AD based authentication methods.
         credential = DefaultAzureCredential()
         client = AgentsClient(endpoint=self.config.AZURE_PROJECT_ENDPOINT, credential=credential)
 
-        # Use predefined agent ID from configuration
         predefined_agent_id = self.config.AZURE_AGENT_ID
-
-        # Add instruction to the query
         instructional_query = f"Search the web for the latest information on these topics: {query}. For each finding, you must cite the source URL."
-
-        thread = AgentThreadCreationOptions(messages=[{"role": "user", "content": instructional_query}])
-        run = client.create_thread_and_run(agent_id=predefined_agent_id, thread=thread)
+        thread_options = AgentThreadCreationOptions(messages=[{"role": "user", "content": instructional_query}])
+        run = client.create_thread_and_run(agent_id=predefined_agent_id, thread=thread_options)
 
         while run.status not in ["completed", "failed", "canceled", "cancelled"]:
             time.sleep(1)
             run = client.runs.get(run_id=run.id, thread_id=run.thread_id)
 
-        messages = list(client.messages.list(thread_id=run.thread_id, order=ListSortOrder.ASCENDING))
-
         search_data = {"webPages": {"value": []}, "urls": []}
-        for msg in messages:
-            if msg.role != "agent":
-                continue
-            text_content = "\n".join(t.text.value for t in msg.text_messages)
-            for ann in msg.url_citation_annotations or []:
-                url = ann.url_citation.url
-                title = ann.url_citation.title or ""
-                search_data["webPages"]["value"].append({"name": title, "url": url, "snippet": text_content})
-                search_data["urls"].append(url)
+        run_steps = client.runs.steps.list(run_id=run.id, thread_id=run.thread_id)
 
-        self.config.logprint.info("Bing Search Results:")
+        for step in run_steps:
+            if step.step_details and step.step_details.tool_calls:
+                for tool_call in step.step_details.tool_calls:
+                    if tool_call.bing and tool_call.bing.output:
+                        try:
+                            tool_output = json.loads(tool_call.bing.output)
+                            for result in tool_output.get("results", []):
+                                if result.get("url"):
+                                    search_data["webPages"]["value"].append({
+                                        "name": result.get("title", ""),
+                                        "url": result.get("url", ""),
+                                        "snippet": result.get("snippet", "")
+                                    })
+                                    search_data["urls"].append(result.get("url"))
+                        except json.JSONDecodeError:
+                            self.config.elogprint.error("Failed to decode Bing tool output JSON.")
+
+        self.config.logprint.info("Bing Search Results from Tool Output:")
         for result in search_data["webPages"]["value"][:count]:
             self.config.logprint.info(f"Title: {result['name']}")
             self.config.logprint.info(f"URL: {result['url']}")
