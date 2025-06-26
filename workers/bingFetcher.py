@@ -14,6 +14,7 @@ from azure.ai.agents import AgentsClient
 from azure.ai.agents.models import BingGroundingTool, AgentThreadCreationOptions, ListSortOrder
 from azure.identity import DefaultAzureCredential
 import urllib.parse
+import json
 
 class BingFetcher:
     def __init__(self, context, config):
@@ -100,19 +101,19 @@ class BingFetcher:
         bing_query_url = None
 
         # Get run steps to extract Bing query URL
-        run_steps = client.agents.list_run_steps(run_id=run.id, thread_id=run.thread_id)
-        # run_stepsがOpenAIPageableListならdata属性、そうでなければそのまま
-        steps_iter = getattr(run_steps, "data", run_steps)
+        steps_iterable = client.run_steps.list(thread_id=run.thread_id, run_id=run.id)
+        # The result is pageable; convert to list for multiple iterations
+        steps = list(getattr(steps_iterable, "data", steps_iterable))
 
         # Dump raw run_steps for debugging
         try:
-            run_steps_dict = [step.to_dict() for step in steps_iter]
+            run_steps_dict = [step.to_dict() for step in steps]
             self.config.logprint.info(f"Raw run_steps JSON: {json.dumps(run_steps_dict, indent=2)}")
         except Exception as e:
             self.config.elogprint.error(f"Could not serialize run_steps for debugging: {e}")
 
         # Extract Bing search query URL from run steps
-        for step in steps_iter:
+        for step in steps:
             if hasattr(step, "step_details") and step.step_details and hasattr(step.step_details, "tool_calls") and step.step_details.tool_calls:
                 for tool_call in step.step_details.tool_calls:
                     if hasattr(tool_call, "bing") and tool_call.bing and hasattr(tool_call.bing, "requesturl") and tool_call.bing.requesturl:
