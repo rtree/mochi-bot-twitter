@@ -100,7 +100,7 @@ class BingFetcher:
         bing_query_url = None
 
         # Get run steps to extract Bing query URL
-        run_steps = client.runs.list_steps(run_id=run.id, thread_id=run.thread_id)
+        run_steps = client.agents.list_run_steps(run_id=run.id, thread_id=run.thread_id)
 
         # Dump raw run_steps for debugging
         try:
