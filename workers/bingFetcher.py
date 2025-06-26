@@ -1,6 +1,7 @@
 # bingFetcher.py
 import asyncio
 import base64
+import os
 import requests
 import time
 from datetime import datetime
@@ -10,7 +11,7 @@ from bs4 import BeautifulSoup
 from openai import OpenAI
 from azure.ai.agents import AgentsClient
 from azure.ai.agents.models import BingGroundingTool, AgentThreadCreationOptions, ListSortOrder
-from azure.core.credentials import AzureKeyCredential
+from azure.identity import DefaultAzureCredential
 
 class BingFetcher:
     def __init__(self, context, config):
@@ -74,7 +75,17 @@ class BingFetcher:
     def _search_bing(self, query, count=None):
         count = count or self.config.BING_SEARCH_RESULTS
 
-        credential = AzureKeyCredential(self.config.AZURE_PROJECT_API_KEY)
+        # Ensure service principal credentials are available for DefaultAzureCredential
+        if self.config.AZURE_CLIENT_ID:
+            os.environ["AZURE_CLIENT_ID"] = self.config.AZURE_CLIENT_ID
+        if self.config.AZURE_CLIENT_SECRET:
+            os.environ["AZURE_CLIENT_SECRET"] = self.config.AZURE_CLIENT_SECRET
+        if self.config.AZURE_TENANT_ID:
+            os.environ["AZURE_TENANT_ID"] = self.config.AZURE_TENANT_ID
+
+        # Authenticate using DefaultAzureCredential which supports service principal
+        # or other Azure AD based authentication methods.
+        credential = DefaultAzureCredential()
         client = AgentsClient(endpoint=self.config.AZURE_PROJECT_ENDPOINT, credential=credential)
 
         # Use predefined agent ID from configuration
