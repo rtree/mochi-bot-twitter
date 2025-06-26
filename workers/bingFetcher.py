@@ -39,7 +39,7 @@ class BingFetcher:
         self.config.logprint.info(f"search_results: {search_results}")
         self.config.logprint.info("= End of search_bing =========================================================")
 
-        
+
         # Summarize results with pages
         #fetched = await self._summarize_results_with_pages_async(search_results)
         #urls = [result['url'] for result in search_results.get('webPages', {}).get('value', [])]
@@ -102,6 +102,13 @@ class BingFetcher:
         while run.status not in ["completed", "failed", "canceled", "cancelled"]:
             time.sleep(1)
             run = client.runs.get(run_id=run.id, thread_id=run.thread_id)
+
+        # dump run details for debugging
+        try:
+            run_dict = run.to_dict()
+            self.config.logprint.info(f"Run details JSON: {json.dumps(run_dict, indent=2)}")
+        except Exception as e:
+            self.config.elogprint.error(f"Could not serialize run details for debugging: {e}")
 
         search_data = {"webPages": {"value": []}, "urls": []}
         bing_query_url = None
