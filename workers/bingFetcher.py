@@ -98,6 +98,13 @@ class BingFetcher:
         search_data = {"webPages": {"value": []}, "urls": []}
         run_steps = client.runs.steps.list(run_id=run.id, thread_id=run.thread_id)
 
+        # Dump raw run_steps for debugging
+        try:
+            run_steps_dict = [step.to_dict() for step in run_steps]
+            self.config.logprint.info(f"Raw run_steps JSON: {json.dumps(run_steps_dict, indent=2)}")
+        except Exception as e:
+            self.config.elogprint.error(f"Could not serialize run_steps for debugging: {e}")
+
         for step in run_steps:
             if step.step_details and step.step_details.tool_calls:
                 for tool_call in step.step_details.tool_calls:
