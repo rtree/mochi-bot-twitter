@@ -34,10 +34,16 @@ class BingFetcher:
         self.config.logprint.info(f"keyword: {keywords}")
 
         search_results = self._search_bing(keywords)
-        fetched = await self._summarize_results_with_pages_async(search_results)
+        # return empty always for dummy
+        self.config.logprint.info("= search_bing ==============================================================")
+        self.config.logprint.info(f"search_results: {search_results}")
+        self.config.logprint.info("= End of search_bing =========================================================")
 
-        urls = [result['url'] for result in search_results.get('webPages', {}).get('value', [])]
-        return fetched, urls
+        
+        # Summarize results with pages
+        #fetched = await self._summarize_results_with_pages_async(search_results)
+        #urls = [result['url'] for result in search_results.get('webPages', {}).get('value', [])]
+        #return fetched, urls
 
     def _parse_prompt(self):
         prompt = (
