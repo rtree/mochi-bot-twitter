@@ -5,6 +5,7 @@ import os
 import requests
 import time
 import json
+from urllib.parse import urlparse, parse_qs, unquote
 from datetime import datetime
 from PyPDF2 import PdfReader
 from io import BytesIO
@@ -96,33 +97,58 @@ class BingFetcher:
             run = client.runs.get(run_id=run.id, thread_id=run.thread_id)
 
         search_data = {"webPages": {"value": []}, "urls": []}
+
+        # Get source URLs from message annotations, as per the documentation
+        messages = client.threads.list_messages(thread_id=run.thread_id)
+        for message in messages.data:  # Default order is descending (latest first)
+            if message.role == "assistant":
+                for content_item in message.content:
+                    if content_item.type == "text":
+                        for annotation in content_item.text.annotations:
+                            if annotation.type == 'url_citation':
+                                citation = getattr(annotation, 'url_citation', None)
+                                if citation:
+                                    url = getattr(citation, 'url', None)
+                                    title = getattr(citation, 'title', '')
+                                    if url:
+                                        search_data["webPages"]["value"].append({
+                                            "name": title,
+                                            "url": url,
+                                            "snippet": ""  # Snippet is not available via annotations
+                                        })
+                                        search_data["urls"].append(url)
+                if search_data["webPages"]["value"]:
+                    break  # Stop after processing the first (latest) assistant message with citations
+
+        # Get Bing search query URL from run steps
         run_steps = client.runs.list_steps(run_id=run.id, thread_id=run.thread_id)
 
-        # Dump raw run_steps for debugging
         try:
-            run_steps_dict = [step.to_dict() for step in run_steps]
-            self.config.logprint.info(f"Raw run_steps JSON: {json.dumps(run_steps_dict, indent=2)}")
+            run_steps_list = list(run_steps)
+            self.config.logprint.info(f"Raw run_steps: {[repr(s) for s in run_steps_list]}")
         except Exception as e:
             self.config.elogprint.error(f"Could not serialize run_steps for debugging: {e}")
+            run_steps_list = list(client.runs.list_steps(run_id=run.id, thread_id=run.thread_id))
 
-        for step in run_steps:
-            if step.step_details and step.step_details.tool_calls:
+        bing_search_url = ""
+        for step in run_steps_list:
+            if step.type == "tool_calls" and step.step_details and step.step_details.tool_calls:
                 for tool_call in step.step_details.tool_calls:
-                    if tool_call.bing and tool_call.bing.output:
-                        try:
-                            tool_output = json.loads(tool_call.bing.output)
-                            for result in tool_output.get("results", []):
-                                if result.get("url"):
-                                    search_data["webPages"]["value"].append({
-                                        "name": result.get("title", ""),
-                                        "url": result.get("url", ""),
-                                        "snippet": result.get("snippet", "")
-                                    })
-                                    search_data["urls"].append(result.get("url"))
-                        except json.JSONDecodeError:
-                            self.config.elogprint.error("Failed to decode Bing tool output JSON.")
+                    if tool_call.type == 'bing_grounding':
+                        bg = getattr(tool_call, 'bing_grounding', None)
+                        if bg and hasattr(bg, 'requesturl'):
+                            request_url = bg.requesturl
+                            parsed_url = urlparse(request_url)
+                            query_params = parse_qs(parsed_url.query)
+                            if 'q' in query_params:
+                                search_query = unquote(query_params['q'][0])
+                                bing_search_url = f"https://www.bing.com/search?q={search_query}"
+                                self.config.logprint.info(f"Bing Search URL: {bing_search_url}")
+                                break
+            if bing_search_url:
+                break
 
-        self.config.logprint.info("Bing Search Results from Tool Output:")
+        self.config.logprint.info("Bing Search Results from Message Annotations:")
         for result in search_data["webPages"]["value"][:count]:
             self.config.logprint.info(f"Title: {result['name']}")
             self.config.logprint.info(f"URL: {result['url']}")
@@ -181,4 +207,3 @@ class BingFetcher:
 
         content, ctype = await asyncio.to_thread(blocking_fetch)
         return content, ctype
-
