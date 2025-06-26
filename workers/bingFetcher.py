@@ -104,6 +104,7 @@ class BingFetcher:
             run = client.runs.get(run_id=run.id, thread_id=run.thread_id)
 
         # dump run details for debugging
+        self.config.logprint.info(f"★★★★★★★Run status: {run.status}")
         try:
             run_dict = run.to_dict()
             self.config.logprint.info(f"Run details JSON: {json.dumps(run_dict, indent=2)}")
