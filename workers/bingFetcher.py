@@ -108,7 +108,7 @@ class BingFetcher:
         # dump run details for debugging
         self.config.logprint.info(f"★★★★★★★Run status: {run.status}")
         try:
-            run_dict = run.to_dict()
+            run_dict = run.model_dump()
             self.config.logprint.info(f"Run details JSON: {json.dumps(run_dict, indent=2)}")
         except Exception as e:
             self.config.elogprint.error(f"Could not serialize run details for debugging: {e}")
@@ -123,7 +123,7 @@ class BingFetcher:
 
         # Dump raw run_steps for debugging
         try:
-            run_steps_dict = [step.to_dict() for step in steps]
+            run_steps_dict = [step.model_dump() for step in steps]
             self.config.logprint.info(f"Raw run_steps JSON: {json.dumps(run_steps_dict, indent=2)}")
         except Exception as e:
             self.config.elogprint.error(f"Could not serialize run_steps for debugging: {e}")
