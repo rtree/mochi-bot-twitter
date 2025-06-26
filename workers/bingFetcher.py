@@ -117,7 +117,7 @@ class BingFetcher:
             self.config.logprint.info(f"URL: {result['url']}")
             self.config.logprint.info(f"Snippet: {result['snippet']}")
             self.config.logprint.info("---")
-
+        print("search_data in _search_bing:", search_data)
         return search_data
 
     async def _summarize_results_with_pages_async(self, search_results):
@@ -140,6 +140,7 @@ class BingFetcher:
                 content_list.append(f"{self.config.FETCHER_START_OF_CONTENT}\nタイトル: {title}\nURL: {url}\n内容:\n{page_content}\nSRC: {self.srcname}\n{self.config.FETCHER_END_OF_CONTENT}\n")
             else:
                 content_list.append(f"{self.config.FETCHER_START_OF_CONTENT}\nタイトル: {title}\nURL: {url}\nスニペット:\n{snippet}\nSRC: {self.srcname}\n{self.config.FETCHER_END_OF_CONTENT}\n")
+        print("content_list in _summarize_results_with_pages_async:", content_list)
         return "\n".join(content_list)
 
     async def _fetch_page_content_async(self, url):
