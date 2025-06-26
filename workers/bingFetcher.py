@@ -4,7 +4,6 @@ import base64
 import os
 import requests
 import time
-import json
 from urllib.parse import urlparse, parse_qs, unquote
 from datetime import datetime
 from PyPDF2 import PdfReader
@@ -99,7 +98,9 @@ class BingFetcher:
 
         search_data = {"webPages": {"value": []}, "urls": []}
         bing_query_url = None
-        run_steps = client.agents.list_run_steps(run_id=run.id, thread_id=run.thread_id)
+
+        # Get run steps to extract Bing query URL
+        run_steps = client.runs.list_steps(run_id=run.id, thread_id=run.thread_id)
 
         # Dump raw run_steps for debugging
         try:
@@ -108,48 +109,42 @@ class BingFetcher:
         except Exception as e:
             self.config.elogprint.error(f"Could not serialize run_steps for debugging: {e}")
 
-        # 1. Bing検索クエリURLの抽出
+        # Extract Bing search query URL from run steps
         for step in run_steps:
             if hasattr(step, "step_details") and step.step_details and hasattr(step.step_details, "tool_calls") and step.step_details.tool_calls:
                 for tool_call in step.step_details.tool_calls:
-                    # Bing GroundingのリクエストURLを取得
                     if hasattr(tool_call, "bing") and tool_call.bing and hasattr(tool_call.bing, "requesturl") and tool_call.bing.requesturl:
                         try:
-                            parsed = urllib.parse.urlparse(tool_call.bing.requesturl)
-                            qs = urllib.parse.parse_qs(parsed.query)
+                            parsed = urlparse(tool_call.bing.requesturl)
+                            qs = parse_qs(parsed.query)
                             q = qs.get("q", [""])[0]
-                            q = urllib.parse.unquote(q)
+                            q = unquote(q)
                             bing_query_url = f"https://www.bing.com/search?q={urllib.parse.quote(q)}"
                             self.config.logprint.info(f"Bing Query URL: {bing_query_url}")
                         except Exception as e:
                             self.config.elogprint.error(f"Failed to extract Bing query URL: {e}")
 
-        # 2. 検索結果の抽出
-        for step in run_steps:
-            if hasattr(step, "step_details") and step.step_details and hasattr(step.step_details, "tool_calls") and step.step_details.tool_calls:
-                for tool_call in step.step_details.tool_calls:
-                    if hasattr(tool_call, "bing") and tool_call.bing and hasattr(tool_call.bing, "output") and tool_call.bing.output:
-                        try:
-                            tool_output = json.loads(tool_call.bing.output)
-                            for result in tool_output.get("results", []):
-                                if result.get("url"):
-                                    search_data["webPages"]["value"].append({
-                                        "name": result.get("title", ""),
-                                        "url": result.get("url", ""),
-                                        "snippet": result.get("snippet", "")
-                                    })
-                                    search_data["urls"].append(result.get("url"))
-                        except json.JSONDecodeError:
-                            self.config.elogprint.error("Failed to decode Bing tool output JSON.")
+        # Extract URLs from agent messages
+        messages = list(client.messages.list(thread_id=run.thread_id, order=ListSortOrder.ASCENDING))
+        for msg in messages:
+            if msg.role != "agent":
+                continue
+            if hasattr(msg, "url_citation_annotations") and msg.url_citation_annotations:
+                for ann in msg.url_citation_annotations:
+                    if hasattr(ann, "url_citation") and ann.url_citation and hasattr(ann.url_citation, "url") and ann.url_citation.url:
+                        url = ann.url_citation.url
+                        title = ann.url_citation.title or ""
+                        snippet = ann.url_citation.snippet or ""
+                        search_data["webPages"]["value"].append({"name": title, "url": url, "snippet": snippet})
+                        search_data["urls"].append(url)
 
-        self.config.logprint.info("Bing Search Results from Tool Output:")
+        self.config.logprint.info("Bing Search Results from Agent Messages:")
         for result in search_data["webPages"]["value"][:count]:
             self.config.logprint.info(f"Title: {result['name']}")
             self.config.logprint.info(f"URL: {result['url']}")
             self.config.logprint.info(f"Snippet: {result['snippet']}")
             self.config.logprint.info("---")
 
-        # 3. Bing検索クエリURLも返却
         search_data["bing_query_url"] = bing_query_url
         return search_data
 
