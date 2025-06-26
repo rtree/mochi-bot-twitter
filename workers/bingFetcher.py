@@ -96,7 +96,7 @@ class BingFetcher:
             run = client.runs.get(run_id=run.id, thread_id=run.thread_id)
 
         search_data = {"webPages": {"value": []}, "urls": []}
-        run_steps = client.runs.steps.list(run_id=run.id, thread_id=run.thread_id)
+        run_steps = client.runs.list_steps(run_id=run.id, thread_id=run.thread_id)
 
         # Dump raw run_steps for debugging
         try:
