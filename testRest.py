@@ -10,6 +10,10 @@ ENDPOINT = os.getenv("AZURE_PROJECT_ENDPOINT").rstrip("/")
 API_KEY  = os.getenv("AZURE_PROJECT_API_KEY")
 AGENT_ID = os.getenv("AZURE_AGENT_ID")
 
+print(f"ENDPOINT: {ENDPOINT}");
+print(f"AGENT_ID: {AGENT_ID}");
+print("API_KEY (first 10 chars):", API_KEY[:10], flush=True)
+
 if not (ENDPOINT and API_KEY and AGENT_ID):
     raise RuntimeError(".env に ENDPOINT / API_KEY / AGENT_ID が設定されていません")
 
@@ -22,7 +26,12 @@ def create_run(prompt: str):
         "thread": {"messages": [{"role": "user", "content": prompt}]}
     }
     res = requests.post(url, headers=HEADERS, json=body, timeout=30)
-    res.raise_for_status()
+    try:
+        res.raise_for_status()
+    except requests.HTTPError as e:
+        print("Status:", res.status_code)
+        print("Response:", res.text)      # ← Azure からの詳細メッセージ
+        raise
     j = res.json()
     return j["thread_id"], j["id"]
 
