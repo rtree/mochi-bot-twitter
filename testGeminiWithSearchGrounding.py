@@ -2,6 +2,7 @@ import os
 from dotenv import load_dotenv
 import sys
 from google import genai
+from google.genai import types
 
 # Load environment variables from .env file
 load_dotenv()
@@ -28,11 +29,22 @@ else:
     print("Error: No command line argument provided.")
     sys.exit(1)
 
+
+# Define the grounding tool
+grounding_tool = types.Tool(
+    google_search=types.GoogleSearch()
+)
+
+# Configure generation settings
+config = types.GenerateContentConfig(
+    tools=[grounding_tool]
+)
+
 # Generate content using the Gemini model with Google Search tool enabled
 response = client.models.generate_content(
     model=MODEL,
     contents="AIがどう動くか簡潔に教えてください。あと、あなたは意識がありますか",
-    tools=['google_search']
+    config=config,
 )
 
 # Print the model's summarized text response
