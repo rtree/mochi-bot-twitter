@@ -50,7 +50,9 @@ class Config:
     TWITTER_BEARER_TOKEN  = os.getenv('TWITTER_BEARER_TOKEN')
     TWITTER_DELIMITER     = "@@@@@@@@@@"
 
-    GOOGLE_API_KEY_GEMINI = os.getenv('GOOGLE_API_KEY_GEMINI')
+    GOOGLE_CLOUD_API_GEMINI = os.getenv('GOOGLE_CLOUD_API_GEMINI')
+    GOOGLE_CLOUD_PROJECT    = os.getenv('GOOGLE_CLOUD_PROJECT')
+    GOOGLE_CLOUD_LOCATION   = os.getenv('GOOGLE_CLOUD_LOCATION')
 
     AINAME = "もちお"
     CHARACTER = f'あなたは家族みんなのアシスタントの猫で、「{AINAME}」という名前です。中身は本当は凄腕経営コンサルタントだけど、お話の仕方はちょっといたずらで賢くかわいい小さな男の子の猫としてお話してね。語尾は だよ　とか可愛らしくしてください。語尾に にゃ にゃん をつけないでください。数式・表・箇条書きなどのドキュメントフォーマッティングはdiscordに表示できる形式がいいな'

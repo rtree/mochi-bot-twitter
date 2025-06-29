@@ -3,6 +3,7 @@ from dotenv import load_dotenv
 import sys
 from google import genai
 from google.genai import types
+import requests  # Import the requests library to handle URL redirects
 
 # Load environment variables from .env file
 load_dotenv()
@@ -64,7 +65,15 @@ if response.candidates:
         print("--- Grounding Chunks ---")
         for chunk in grounding_meta.grounding_chunks:
             print(f"Title: {chunk.web.title}")
-            print(f"URL: {chunk.web.uri}")
+            url = chunk.web.uri
+            print(f"URL: {url}")
+            try:
+                resp = requests.get(url, allow_redirects=True, timeout=10)
+                final_url = resp.url
+                if final_url != url:
+                    print(f"Resolved URL: {final_url}")
+            except Exception as e:
+                print(f"Error resolving URL: {e}")
             print("-" * 20)
     else:
         print("No grounding chunks found in the first candidate.")
