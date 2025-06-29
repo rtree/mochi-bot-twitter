@@ -43,7 +43,7 @@ config = types.GenerateContentConfig(
 # Generate content using the Gemini model with Google Search tool enabled
 response = client.models.generate_content(
     model=MODEL,
-    contents="AIがどう動くか簡潔に教えてください。あと、あなたは意識がありますか",
+    contents="AIがどう動くか簡潔に教えてください。あと、あなたは意識がありますか。最新の検索結果をGoogle検索してまとめてください",
     config=config,
 )
 
