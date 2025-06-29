@@ -13,3 +13,4 @@ feedparser
 azure-ai-agents
 azure-identity
 azure-core
+azure-ai-generative

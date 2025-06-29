@@ -1,33 +1,31 @@
 import os
 import google.generativeai as genai
-from config import Config
 
-def get_latest_news_with_api_key():
+def get_latest_news():
     """
-    Uses the Google Generative AI SDK (with an API key from config.py) and the Google Search tool
-    to find the hottest news and print the results with source URLs.
+    Uses the Gemini API with the Google Search tool to find the hottest news
+    and prints the results along with their source URLs.
     """
-    config = Config()
-    google_api_key_gemini = config.GOOGLE_API_KEY_GEMINI
-
-    if not google_api_key_gemini:
-        print("Error: GOOGLE_API_KEY_GEMINI not set in your .env file or config.py.")
+    google_api_key = os.environ.get("GOOGLE_API_KEY")
+    if not google_api_key:
+        print("Error: GOOGLE_API_KEY environment variable not set.")
         return
 
     try:
-        # Configure the generative AI client with the API key
-        genai.configure(api_key=google_api_key_gemini)
+        # Configure the generative AI client
+        genai.configure(api_key=google_api_key)
 
-        # Create a model with the Google Search tool enabled
+        # Create a model with the Google Search tool enabled.
+        # Using gemini-1.5-flash for speed and cost-effectiveness.
         model = genai.GenerativeModel(
             model_name='gemini-1.5-flash',
-            tools=[genai.GenerativeModel.from_tools(genai.Tool.from_google_search_retrieval())],
+            tools=['google_search'],
         )
 
         # The prompt for the model
         prompt = "What is the hottest news as of today? Provide a summary and the source links."
 
-        print(f"Asking Google AI Gemini: '{prompt}'\n")
+        print(f"Asking Gemini: '{prompt}'\n")
 
         # Generate content
         response = model.generate_content(prompt)
@@ -51,4 +49,4 @@ def get_latest_news_with_api_key():
         print(f"An error occurred: {e}")
 
 if __name__ == "__main__":
-    get_latest_news_with_api_key()
+    get_latest_news()
