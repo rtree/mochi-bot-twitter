@@ -3,6 +3,7 @@ from datetime import datetime
 from dotenv import load_dotenv
 from google import genai
 from google.genai import types
+import requests  # For resolving URL redirects
 
 class GoogleFetcher:
     def __init__(self, context, config):
@@ -51,5 +52,11 @@ class GoogleFetcher:
             grounding_meta = response.candidates[0].grounding_metadata
             if grounding_meta and grounding_meta.grounding_chunks:
                 for chunk in grounding_meta.grounding_chunks:
-                    urls.append(chunk.web.uri)
+                    url = chunk.web.uri
+                    try:
+                        resp = requests.get(url, allow_redirects=True, timeout=10)
+                        final_url = resp.url
+                    except Exception:
+                        final_url = url
+                    urls.append(final_url)
         return summary, urls
