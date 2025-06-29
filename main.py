@@ -10,6 +10,7 @@ from workers.processor  import Processor
 from workers.redditFetcher import RedditFetcher
 from workers.bingFetcher import BingFetcher
 from workers.hackerNewsRssFetcher import HackerNewsRssFetcher
+from workers.googleFetcher import GoogleFetcher
 
 async def run_bot():
     try:
@@ -21,7 +22,7 @@ async def run_bot():
 
         if config.FETCHER_DO_FETCH:
             fetchers = [
-                        #BingFetcher(context, config),
+                        GoogleFetcher(context, config),
                         RedditFetcher(context, config),
                         HackerNewsRssFetcher(context, config),
                        ]
