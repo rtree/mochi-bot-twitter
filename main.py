@@ -20,7 +20,8 @@ async def run_bot():
         f_urls_merged = []
 
         if config.FETCHER_DO_FETCH:
-            fetchers = [BingFetcher(context, config),
+            fetchers = [
+                        #BingFetcher(context, config),
                         RedditFetcher(context, config),
                         HackerNewsRssFetcher(context, config),
                        ]
