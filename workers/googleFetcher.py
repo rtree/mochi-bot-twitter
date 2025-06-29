@@ -51,12 +51,18 @@ class GoogleFetcher:
         if response.candidates:
             grounding_meta = response.candidates[0].grounding_metadata
             if grounding_meta and grounding_meta.grounding_chunks:
+                self.config.logprint.info("Google Search Results:")
                 for chunk in grounding_meta.grounding_chunks:
+                    title = chunk.web.title
                     url = chunk.web.uri
                     try:
                         resp = requests.get(url, allow_redirects=True, timeout=10)
                         final_url = resp.url
-                    except Exception:
+                    except Exception as e:
                         final_url = url
+                        self.config.logprint.error(f"Error resolving {url}: {e}")
+                    self.config.logprint.info(f"Title: {title}")
+                    self.config.logprint.info(f"URL: {final_url}")
+                    self.config.logprint.info("---")
                     urls.append(final_url)
         return summary, urls
