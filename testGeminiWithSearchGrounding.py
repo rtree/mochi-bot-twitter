@@ -52,6 +52,9 @@ print("--- Gemini's Response ---")
 print(response.text)
 print("-------------------------\n")
 
+# dump response to see its structure
+print(response) 
+
 # Extract and print the search results from the grounding metadata
 if response.grounding_metadata and response.grounding_metadata.web_search_results:
     print("--- Search Results ---")
