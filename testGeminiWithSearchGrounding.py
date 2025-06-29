@@ -9,7 +9,7 @@ os.environ["GOOGLE_CLOUD_PROJECT"] = "rtree"
 os.environ["GOOGLE_CLOUD_LOCATION"] = "asia-northeast1"
 
 GOOGLE_CLOUD_API_KEY = os.getenv("GOOGLE_CLOUD_API_GEMINI")
-MODEL = "gemini-1.5-flash"
+MODEL = "gemini-2.0-flash"
 
 # Switch how to invoke API by command line argument
 if len(sys.argv) > 1:
