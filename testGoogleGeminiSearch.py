@@ -1,20 +1,22 @@
 import os
 import google.generativeai as genai
+from config import Config
 
 def get_latest_news_with_api_key():
     """
-    Uses the Google Generative AI SDK (with an API key) and the Google Search tool
+    Uses the Google Generative AI SDK (with an API key from config.py) and the Google Search tool
     to find the hottest news and print the results with source URLs.
     """
-    # Get the API key from the environment variable
-    google_api_key = os.environ.get("GOOGLE_API_KEY")
-    if not google_api_key:
-        print("Error: GOOGLE_API_KEY environment variable not set.")
+    config = Config()
+    google_api_key_gemini = config.GOOGLE_API_KEY_GEMINI
+
+    if not google_api_key_gemini:
+        print("Error: GOOGLE_API_KEY_GEMINI not set in your .env file or config.py.")
         return
 
     try:
         # Configure the generative AI client with the API key
-        genai.configure(api_key=google_api_key)
+        genai.configure(api_key=google_api_key_gemini)
 
         # Create a model with the Google Search tool enabled
         model = genai.GenerativeModel(
