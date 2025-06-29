@@ -57,12 +57,16 @@ print("===================raw response:\n")
 print(response) 
 print("===================\n")
 
-# Extract and print the search results from the grounding metadata
-if response.grounding_metadata and response.grounding_metadata.web_search_results:
-    print("--- Search Results ---")
-    for result in response.grounding_metadata.web_search_results:
-        print(f"Title: {result.title}")
-        print(f"URL: {result.uri}")
-        print("-" * 20)
+# Extract and print grounding chunks from the first candidate
+if response.candidates:
+    grounding_meta = response.candidates[0].grounding_metadata
+    if grounding_meta and grounding_meta.grounding_chunks:
+        print("--- Grounding Chunks ---")
+        for chunk in grounding_meta.grounding_chunks:
+            print(f"Title: {chunk.web.title}")
+            print(f"URL: {chunk.web.uri}")
+            print("-" * 20)
+    else:
+        print("No grounding chunks found in the first candidate.")
 else:
-    print("No search results were returned in the grounding metadata.")
+    print("No candidates returned in the response.")
