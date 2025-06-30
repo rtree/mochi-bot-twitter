@@ -14,12 +14,14 @@ class GoogleFetcher:
         load_dotenv()
         os.environ["GOOGLE_CLOUD_PROJECT"]  = os.getenv("GOOGLE_CLOUD_PROJECT",self.config.GOOGLE_CLOUD_PROJECT)
         os.environ["GOOGLE_CLOUD_LOCATION"] = os.getenv("GOOGLE_CLOUD_LOCATION",self.config.GOOGLE_CLOUD_LOCATION)
+        os.environ["GOOGLE_CLOUD_MODEL"]    = os.getenv("GOOGLE_CLOUD_MODEL",self.config.GOOGLE_CLOUD_MODEL)
+
 
         # Initialize Gemini client
         # Use Google API key from config or environment
-        api_key = os.getenv("GOOGLE_CLOUD_API_GEMINI", self.config.GOOGLE_CLOUD_API_GEMINI)
+        api_key     = os.getenv("GOOGLE_CLOUD_API_GEMINI", self.config.GOOGLE_CLOUD_API_GEMINI)
         self.client = genai.Client(vertexai=False, api_key=api_key)
-        self.model = "gemini-2.0-flash"
+        self.model  = os.getenv("GOOGLE_CLOUD_MODEL", self.config.GOOGLE_CLOUD_MODEL)
 
     async def fetch(self):
         """
