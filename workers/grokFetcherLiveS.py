@@ -2,7 +2,7 @@ import os
 from datetime import datetime
 import requests
 
-class GrokFetcherLiveS:
+class GrokFetcher:
     def __init__(self, context, config):
         self.context = context
         self.config = config
