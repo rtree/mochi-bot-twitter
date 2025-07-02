@@ -34,7 +34,7 @@ class GrokFetcher:
          )
 
         response = self.client.chat.completions.create(
-            model="grok-2-latest",
+            model=config.GROK_MODEL,
             messages=[
                 {"role": "system", "content": "You are a social media analyst."},
                 {"role": "user", "content": p_src},
