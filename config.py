@@ -39,6 +39,7 @@ class Config:
     REDDIT_SEARCH_RESULTS = 6
 
     GROK_API_KEY          = os.getenv('GROK_API_KEY')
+    GROK_MODEL            = os.getenv('GROK_MODEL')
 
     HACKER_NEWS_COMMENTS  = 30
     HACKER_NEWS_POINTS    = 95
