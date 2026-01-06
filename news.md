@@ -7,7 +7,7 @@ permalink: /news/
 # 📅 ニュースアーカイブ
 
 <div class="twitter-follow">
-  <a href="https://x.com/because2and2is4" target="_blank">🐦 X(Twitter)でフォロー</a>
+  <a href="https://x.com/techandeco4242" target="_blank">🐦 X(Twitter)でフォロー</a>
 </div>
 
 ---
