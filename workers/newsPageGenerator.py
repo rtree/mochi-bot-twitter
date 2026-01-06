@@ -144,41 +144,30 @@ date: {now.strftime('%Y-%m-%d %H:%M:%S')} +0900
 categories: news
 ---
 
-<div class="post-header">
-  <div class="post-date">📅 {date_display}</div>
-  <div class="post-nav-links">
-    <a href="{{{{ site.baseurl }}}}/news/">アーカイブ</a> | 
-    <a href="{self.twitter_url}" target="_blank">@techandeco4242</a>
-  </div>
-</div>
+📅 {date_display} | [アーカイブ]({{{{ site.baseurl }}}}/news/) | [@techandeco4242]({self.twitter_url})
 
-<div class="post-intro">
 Xに収まりきらなかったニュースをお届け 🐱
-</div>
+
+---
 
 """
         # 各ニュースアイテムを追加
         for i, item in enumerate(parsed_items, 1):
-            content += f'<div class="news-item">\n'
-            content += f'<h3>{i}. {item["title"]}</h3>\n'
-            content += f'<p>{item["text"]}</p>\n'
+            content += f'### {i}. {item["title"]}\n\n'
+            content += f'{item["text"]}\n\n'
             
-            # OGP画像があれば表示
-            if item['ogp_image']:
-                content += f'<img src="{item["ogp_image"]}" alt="{item["title"]}">\n'
+            # OGP画像があれば表示（クリッカブル）
+            if item['ogp_image'] and item['url']:
+                content += f'[![{item["title"]}]({item["ogp_image"]})]({item["url"]})\n\n'
             
             if item['url']:
                 domain = urlparse(item['url']).netloc
-                content += f'<a href="{item["url"]}" class="news-link" target="_blank">🔗 {domain}</a>\n'
+                content += f'🔗 [{domain}]({item["url"]})\n\n'
             
-            content += '</div>\n\n'
+            content += '---\n\n'
 
         # フッター
-        content += f"""
-<div class="post-footer">
-  <a href="{{{{ site.baseurl }}}}/news/">📅 過去のニュース</a> | 
-  <a href="{self.twitter_url}" target="_blank">🐱 テクの猫をフォロー</a>
-</div>
+        content += f"""[📅 過去のニュース]({{{{ site.baseurl }}}}/news/) | [🐱 テクの猫をフォロー]({self.twitter_url})
 """
         return content
 
