@@ -52,6 +52,7 @@ class Config:
     TWITTER_ACCESS_SECRET = os.getenv('TWITTER_ACCESS_SECRET')
     TWITTER_BEARER_TOKEN  = os.getenv('TWITTER_BEARER_TOKEN')
     TWITTER_DELIMITER     = "@@@@@@@@@@"
+    TWITTER_PROFILE_URL   = "https://x.com/techandeco4242"  # Xプロフィール
 
     GOOGLE_CLOUD_API_GEMINI = os.getenv('GOOGLE_CLOUD_API_GEMINI')
     GOOGLE_CLOUD_PROJECT    = os.getenv('GOOGLE_CLOUD_PROJECT')

@@ -1,7 +1,11 @@
 import os
+import re
 import subprocess
+import requests
 from datetime import datetime
 from pathlib import Path
+from bs4 import BeautifulSoup
+from urllib.parse import urlparse
 
 
 class NewsPageGenerator:
@@ -10,6 +14,7 @@ class NewsPageGenerator:
         # 現在のリポジトリ内でGitHub Pagesを使用
         self.pages_repo_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))  # プロジェクトルート
         self.posts_dir = os.path.join(self.pages_repo_path, '_posts')
+        self.twitter_url = config.TWITTER_PROFILE_URL  # Xアカウント
 
     def generate_and_publish(self, all_news_content, urls):
         """
@@ -36,6 +41,43 @@ class NewsPageGenerator:
             self.config.elogprint.error(f"Failed to publish news page: {str(e)}")
             return False
 
+    def _fetch_ogp_image(self, url):
+        """URLからOGP画像を取得"""
+        try:
+            headers = {'User-Agent': 'Mozilla/5.0 (compatible; MochiBot/1.0)'}
+            response = requests.get(url, headers=headers, timeout=5)
+            response.raise_for_status()
+            soup = BeautifulSoup(response.content, 'html.parser')
+            
+            # OGP画像を探す
+            og_image = soup.find('meta', property='og:image')
+            if og_image and og_image.get('content'):
+                return og_image['content']
+            
+            # Twitter Card画像を探す
+            twitter_image = soup.find('meta', attrs={'name': 'twitter:image'})
+            if twitter_image and twitter_image.get('content'):
+                return twitter_image['content']
+            
+            return None
+        except Exception as e:
+            self.config.logprint.warning(f"Failed to fetch OGP image from {url}: {str(e)}")
+            return None
+
+    def _extract_title_from_text(self, text):
+        """ニュース本文から短いタイトルを抽出"""
+        # 最初の文を取得して短くする
+        text = text.strip()
+        # 最初の句点または。で区切る
+        match = re.split(r'[。．\.、]', text)
+        if match:
+            title = match[0].strip()
+            # 長すぎる場合は切り詰め
+            if len(title) > 50:
+                title = title[:47] + "..."
+            return title
+        return text[:50] + "..." if len(text) > 50 else text
+
     def _generate_markdown(self, all_news_content, urls):
         """Markdownファイルを生成"""
         today = datetime.now()
@@ -46,39 +88,13 @@ class NewsPageGenerator:
         filename = f"{date_str}-daily-news.md"
         filepath = os.path.join(self.posts_dir, filename)
         
-        # ニュースを分割
+        # ニュースを分割してパース
         news_items = all_news_content.split(self.config.TWITTER_DELIMITER)
         news_items = [item.strip() for item in news_items if item.strip()]
         
-        # Markdownコンテンツ生成
-        content = self._build_markdown_content(date_display, news_items, urls)
-        
-        with open(filepath, 'w', encoding='utf-8') as f:
-            f.write(content)
-        
-        self.config.logprint.info(f"Generated markdown file: {filepath}")
-        return filepath
-
-    def _build_markdown_content(self, date_display, news_items, urls):
-        """Markdownコンテンツを構築"""
-        # Jekyll Front Matter
-        content = f"""---
-layout: post
-title: "{date_display}のテック・経済ニュース"
-date: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')} +0900
-categories: news
----
-
-# {date_display}のテック・経済ニュース
-
-もちおがお届けする今日のニュースまとめだよ！
-
----
-
-"""
-        # 各ニュースアイテムを追加
-        for i, item in enumerate(news_items, 1):
-            # URLを本文から抽出（末尾にあるはず）
+        # 各ニュースアイテムを構造化
+        parsed_items = []
+        for item in news_items:
             lines = item.strip().split('\n')
             url = None
             text_lines = []
@@ -91,23 +107,73 @@ categories: news
                     text_lines.append(line)
             
             text = ' '.join(text_lines)
+            title = self._extract_title_from_text(text)
+            ogp_image = self._fetch_ogp_image(url) if url else None
             
-            content += f"## {i}. ニュース\n\n"
-            content += f"{text}\n\n"
-            if url:
-                content += f"🔗 [記事を読む]({url})\n\n"
-            content += "---\n\n"
+            parsed_items.append({
+                'title': title,
+                'text': text,
+                'url': url,
+                'ogp_image': ogp_image
+            })
+        
+        # メインタイトルは最初のニュースから
+        main_title = parsed_items[0]['title'] if parsed_items else f"{date_display}のニュース"
+        
+        # Markdownコンテンツ生成
+        content = self._build_markdown_content(date_display, main_title, parsed_items, urls)
+        
+        with open(filepath, 'w', encoding='utf-8') as f:
+            f.write(content)
+        
+        self.config.logprint.info(f"Generated markdown file: {filepath}")
+        return filepath
 
-        # フッター
-        content += f"""
-## 参考リンク一覧
+    def _build_markdown_content(self, date_display, main_title, parsed_items, urls):
+        """Markdownコンテンツを構築"""
+        now = datetime.now()
+        
+        # Jekyll Front Matter
+        content = f"""---
+layout: post
+title: "{main_title}"
+date: {now.strftime('%Y-%m-%d %H:%M:%S')} +0900
+categories: news
+---
+
+<div class="post-navigation">
+  <a href="{{{{ site.baseurl }}}}/news/">📅 他の日のニュース</a> | 
+  <a href="{self.twitter_url}" target="_blank">🐦 X(Twitter)でフォロー</a>
+</div>
+
+# {date_display}のニュースまとめ
+
+もちおがお届けする今日のニュースだよ！ 🐱
+
+---
 
 """
-        for i, url in enumerate(urls, 1):
-            if url:
-                content += f"{i}. {url}\n"
+        # 各ニュースアイテムを追加
+        for i, item in enumerate(parsed_items, 1):
+            content += f"## {i}. {item['title']}\n\n"
+            content += f"{item['text']}\n\n"
+            
+            # OGP画像があれば表示
+            if item['ogp_image']:
+                content += f"![{item['title']}]({item['ogp_image']})\n\n"
+            
+            if item['url']:
+                domain = urlparse(item['url']).netloc
+                content += f"🔗 [{domain}]({item['url']})\n\n"
+            
+            content += "---\n\n"
 
+        # ナビゲーションとフッター
         content += f"""
+<div class="post-navigation">
+  <a href="{{{{ site.baseurl }}}}/news/">📅 他の日のニュース一覧</a> | 
+  <a href="{self.twitter_url}" target="_blank">🐦 X(Twitter)でフォロー</a>
+</div>
 
 ---
 

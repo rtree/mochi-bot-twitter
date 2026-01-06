@@ -7,6 +7,10 @@ url: "https://rtree.github.io"
 markdown: kramdown
 theme: minima
 
+# Include custom head
+include:
+  - _includes
+
 # RSS Feed
 plugins:
   - jekyll-feed

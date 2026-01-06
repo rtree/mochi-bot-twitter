@@ -5,4 +5,9 @@ title: もちおのニュースまとめ
 
 テック・経済ニュースの日次まとめだよ！ 🐱
 
-📡 **RSSフィード**: [feed.xml]({{ site.baseurl }}/feed.xml)
+<div class="home-links">
+  <a href="{{ site.baseurl }}/news/">📅 ニュースアーカイブ</a> | 
+  <a href="https://x.com/because2and2is4" target="_blank">🐦 X(Twitter)でフォロー</a> |
+  📡 <a href="{{ site.baseurl }}/feed.xml">RSSフィード</a>
+</div>
+
