@@ -1,13 +1,17 @@
 ---
 layout: home
-title: もちおのニュースまとめ
+title: テクの猫
 ---
 
-テック・経済ニュースの日次まとめだよ！ 🐱
+<div class="profile-header">
+  <div class="profile-name">🐱 テクの猫</div>
+  <div class="profile-handle">@techandeco4242 のつぶやけなかったニュース</div>
+  <div class="profile-bio">Xでは文字数制限で載せきれなかったテック・経済ニュースをこちらでまとめてるよ。毎日更新中！</div>
+</div>
 
 <div class="home-links">
-  <a href="{{ site.baseurl }}/news/">📅 ニュースアーカイブ</a> | 
-  <a href="https://x.com/techandeco4242" target="_blank">🐦 X(Twitter)でフォロー</a> |
-  📡 <a href="{{ site.baseurl }}/feed.xml">RSSフィード</a>
+  <a href="{{ site.baseurl }}/news/">📅 アーカイブ</a>
+  <a href="https://x.com/techandeco4242" target="_blank" class="btn-follow">フォローする</a>
+  <a href="{{ site.baseurl }}/feed.xml">📡 RSS</a>
 </div>
 

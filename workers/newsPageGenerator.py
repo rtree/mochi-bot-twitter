@@ -95,18 +95,21 @@ class NewsPageGenerator:
         # 各ニュースアイテムを構造化
         parsed_items = []
         for item in news_items:
-            lines = item.strip().split('\n')
+            item = item.strip()
             url = None
-            text_lines = []
+            text = item
             
-            for line in lines:
-                line = line.strip()
-                if line.startswith('http://') or line.startswith('https://'):
-                    url = line
-                elif line:
-                    text_lines.append(line)
+            # URLを抽出（本文中のどこにあっても対応）
+            url_match = re.search(r'(https?://[^\s]+)', item)
+            if url_match:
+                url = url_match.group(1)
+                # URLを本文から除去
+                text = item.replace(url, '').strip()
+            else:
+                # URLがない記事はスキップ
+                self.config.logprint.warning(f"Skipping news item without URL: {text[:50]}...")
+                continue
             
-            text = ' '.join(text_lines)
             title = self._extract_title_from_text(text)
             ogp_image = self._fetch_ogp_image(url) if url else None
             
@@ -141,21 +144,23 @@ date: {now.strftime('%Y-%m-%d %H:%M:%S')} +0900
 categories: news
 ---
 
-<div class="post-navigation">
-  <a href="{{{{ site.baseurl }}}}/news/">📅 他の日のニュース</a> | 
-  <a href="{self.twitter_url}" target="_blank">🐦 X(Twitter)でフォロー</a>
+<div class="post-header">
+  <div class="post-date">📅 {date_display}</div>
+  <div class="post-nav-links">
+    <a href="{{{{ site.baseurl }}}}/news/">アーカイブ</a> | 
+    <a href="{self.twitter_url}" target="_blank">@techandeco4242</a>
+  </div>
 </div>
 
-# {date_display}のニュースまとめ
-
-もちおがお届けする今日のニュースだよ！ 🐱
-
----
+<div class="post-intro">
+Xに収まりきらなかったニュースをお届け 🐱
+</div>
 
 """
         # 各ニュースアイテムを追加
         for i, item in enumerate(parsed_items, 1):
-            content += f"## {i}. {item['title']}\n\n"
+            content += f'<div class="news-item">\n\n'
+            content += f"### {i}. {item['title']}\n\n"
             content += f"{item['text']}\n\n"
             
             # OGP画像があれば表示
@@ -164,20 +169,16 @@ categories: news
             
             if item['url']:
                 domain = urlparse(item['url']).netloc
-                content += f"🔗 [{domain}]({item['url']})\n\n"
+                content += f'<a href="{item["url"]}" class="news-link" target="_blank">🔗 {domain}</a>\n\n'
             
-            content += "---\n\n"
+            content += '</div>\n\n'
 
-        # ナビゲーションとフッター
+        # フッター
         content += f"""
-<div class="post-navigation">
-  <a href="{{{{ site.baseurl }}}}/news/">📅 他の日のニュース一覧</a> | 
-  <a href="{self.twitter_url}" target="_blank">🐦 X(Twitter)でフォロー</a>
+<div class="post-footer">
+  <a href="{{{{ site.baseurl }}}}/news/">📅 過去のニュース</a> | 
+  <a href="{self.twitter_url}" target="_blank">🐱 テクの猫をフォロー</a>
 </div>
-
----
-
-*このページは自動生成されています。by もちお 🐱*
 """
         return content
 
