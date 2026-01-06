@@ -64,3 +64,66 @@
   color: #888;
 }
 
+/* ナビゲーションリンク */
+.nav-links {
+  display: flex;
+  gap: 1em;
+  flex-wrap: wrap;
+  margin: 1em 0;
+}
+
+.nav-link-item {
+  position: relative;
+  padding: 0.5em 1em;
+  border-radius: 8px;
+  transition: background-color 0.2s;
+  display: inline-block;
+}
+
+.nav-link-item:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* 投稿リストアイテム */
+.post-list-item {
+  position: relative;
+  padding: 0.75em 1em;
+  margin: 0.5em 0;
+  border-radius: 8px;
+  transition: background-color 0.2s;
+}
+
+.post-list-item:hover {
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+.post-list-link {
+  position: static;
+}
+
+.post-list-link::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1;
+}
+
+/* すべて見るリンク */
+.view-all {
+  margin: 1.5em 0;
+}
+
+.view-all-link {
+  display: inline-block;
+  padding: 0.75em 1.5em;
+  border-radius: 8px;
+  transition: background-color 0.2s;
+}
+
+.view-all-link:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
