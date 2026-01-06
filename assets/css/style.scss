@@ -166,6 +166,25 @@ a:hover {
   border-bottom: none;
 }
 
+.news-item h3 {
+  font-size: 16px;
+  font-weight: 700;
+  margin: 0 0 8px 0;
+  color: var(--text-primary);
+}
+
+.news-item p {
+  margin: 0 0 12px 0;
+}
+
+.news-item img {
+  border-radius: 16px;
+  border: 1px solid var(--border-color);
+  max-width: 100%;
+  margin: 12px 0;
+  display: block;
+}
+
 /* 区切り線 */
 hr {
   border: none;

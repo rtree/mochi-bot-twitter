@@ -159,17 +159,17 @@ Xに収まりきらなかったニュースをお届け 🐱
 """
         # 各ニュースアイテムを追加
         for i, item in enumerate(parsed_items, 1):
-            content += f'<div class="news-item">\n\n'
-            content += f"### {i}. {item['title']}\n\n"
-            content += f"{item['text']}\n\n"
+            content += f'<div class="news-item">\n'
+            content += f'<h3>{i}. {item["title"]}</h3>\n'
+            content += f'<p>{item["text"]}</p>\n'
             
             # OGP画像があれば表示
             if item['ogp_image']:
-                content += f"![{item['title']}]({item['ogp_image']})\n\n"
+                content += f'<img src="{item["ogp_image"]}" alt="{item["title"]}">\n'
             
             if item['url']:
                 domain = urlparse(item['url']).netloc
-                content += f'<a href="{item["url"]}" class="news-link" target="_blank">🔗 {domain}</a>\n\n'
+                content += f'<a href="{item["url"]}" class="news-link" target="_blank">🔗 {domain}</a>\n'
             
             content += '</div>\n\n'
 
