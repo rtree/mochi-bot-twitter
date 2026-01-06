@@ -164,7 +164,7 @@ Xに収まりきらなかったニュースをお届け 🐱
                 domain = urlparse(item['url']).netloc
                 content += f'🔗 [{domain}]({item["url"]})\n\n'
             
-            content += '---\n\n'
+            content += '\n---\n\n'
 
         # フッター
         content += f"""[📅 過去のニュース]({{{{ site.baseurl }}}}/news/) | [🐱 テクの猫をフォロー]({self.twitter_url})
