@@ -1,0 +1,30 @@
+title: もちおのニュースまとめ
+description: テック・経済ニュースの日次まとめ 🐱
+baseurl: "/mochi-bot-twitter"
+url: "https://rtree.github.io"
+
+# Build settings
+markdown: kramdown
+theme: minima
+
+# RSS Feed
+plugins:
+  - jekyll-feed
+
+# Feed settings
+feed:
+  path: feed.xml
+
+# Exclude from build
+exclude:
+  - workers/
+  - config.py
+  - main.py
+  - requirements.txt
+  - test*.py
+  - test*.html
+  - .log/
+  - .env
+  - __pycache__/
+  - "*.py"
+  - docs/GITHUB_PAGES_SETUP.md

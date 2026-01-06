@@ -11,6 +11,7 @@ from workers.redditFetcher import RedditFetcher
 from workers.bingFetcher import BingFetcher
 from workers.hackerNewsRssFetcher import HackerNewsRssFetcher
 from workers.googleFetcher import GoogleFetcher
+from workers.newsPageGenerator import NewsPageGenerator
 
 async def run_bot():
     try:
@@ -84,6 +85,13 @@ async def run_bot():
             dispatcher.post_to_twitter(summary)
             config.logprint.info("Twitter posting completed.")
 
+        # GitHub Pagesへの投稿（全ニュース）
+        if config.PAGES_DO_PUBLISH:
+            config.logprint.info("Starting GitHub Pages publishing...")
+            news_generator = NewsPageGenerator(config)
+            news_generator.generate_and_publish(summary, f_urls_merged)
+            config.logprint.info("GitHub Pages publishing completed.")
+
     except Exception as e:
         config.elogprint.error(f"API Call Error: {str(e)}")
         return f"Error: {str(e)}"
@@ -97,5 +105,8 @@ if __name__ == "__main__":
 
     if not ('nosummary' in sys.argv):
         Config.PROCESSOR_DO_EACH_SUMMARY = True
+
+    if not ('nopages' in sys.argv):
+        Config.PAGES_DO_PUBLISH = True
 
     asyncio.run(run_bot())

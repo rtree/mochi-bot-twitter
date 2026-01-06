@@ -15,7 +15,12 @@ class Dispatcher:
 
     def post_to_twitter(self, content):
         tweets = content.split(self.config.TWITTER_DELIMITER)
+        tweets = [tweet.strip() for tweet in tweets if tweet.strip()]  # 空白除去 & 空ツイート除外
         #tweets = [tweet[:199] for tweet in tweets]
+
+        if not tweets:
+            self.config.logprint.error("No tweets to post after splitting.")
+            return
 
         try:
             first_tweet = self.twclient.create_tweet(text=tweets[0])

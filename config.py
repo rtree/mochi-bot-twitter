@@ -14,6 +14,8 @@ class Config:
     TWITTER_DO_TWEET          = False
     # if argument 'nosummary' is not in sys.argv, set to True -> summarize each search result
     PROCESSOR_DO_EACH_SUMMARY = False 
+    # if argument 'nopages'   is not in sys.argv, set to True -> publish to GitHub Pages
+    PAGES_DO_PUBLISH          = False 
 
     OPENAI_API_KEY        = os.getenv('OPENAI_API_KEY')
     OPENAI_GPT_MODEL      = os.getenv('OPENAI_GPT_MODEL')
