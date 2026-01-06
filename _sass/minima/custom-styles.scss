@@ -1,0 +1,238 @@
+// Custom styles added after minima base styles
+
+/* X(Twitter)風ダークモード追加スタイル */
+
+body {
+  background-color: #000000 !important;
+  color: #e7e9ea !important;
+}
+
+.page-content {
+  background-color: #000000 !important;
+}
+
+.wrapper {
+  max-width: 600px;
+}
+
+/* ヘッダー */
+.site-header {
+  background-color: rgba(0, 0, 0, 0.85) !important;
+  border-top: none !important;
+  border-bottom: 1px solid #2f3336;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  backdrop-filter: blur(12px);
+}
+
+.site-title,
+.site-title:visited {
+  color: #e7e9ea !important;
+  font-weight: 700;
+}
+
+.site-nav .page-link {
+  color: #e7e9ea !important;
+}
+
+/* フッター */
+.site-footer {
+  background-color: #000000 !important;
+  border-top: 1px solid #2f3336;
+}
+
+.footer-heading {
+  color: #e7e9ea !important;
+}
+
+/* 投稿リスト */
+.post-list > li {
+  border-bottom: 1px solid #2f3336;
+  padding: 16px 0;
+  margin-bottom: 0;
+}
+
+.post-list > li:hover {
+  background-color: #16181c;
+}
+
+.post-link {
+  color: #e7e9ea !important;
+}
+
+.post-meta {
+  color: #71767b !important;
+}
+
+/* リンク */
+a {
+  color: #1d9bf0;
+}
+
+a:visited {
+  color: #1d9bf0;
+}
+
+a:hover {
+  color: #1d9bf0;
+}
+
+/* ニュースアイテム */
+.news-item {
+  border-bottom: 1px solid #2f3336;
+  padding: 16px 0;
+}
+
+.news-item:last-child {
+  border-bottom: none;
+}
+
+.news-item h3 {
+  font-size: 16px;
+  font-weight: 700;
+  margin: 0 0 8px 0;
+  color: #e7e9ea;
+}
+
+.news-item p {
+  margin: 0 0 12px 0;
+  color: #e7e9ea;
+}
+
+.news-item img {
+  border-radius: 16px;
+  border: 1px solid #2f3336;
+  max-width: 100%;
+  margin: 12px 0;
+  display: block;
+}
+
+/* 画像 */
+.post-content img {
+  border-radius: 16px;
+  border: 1px solid #2f3336;
+}
+
+/* プロフィールヘッダー */
+.profile-header {
+  padding: 16px 0;
+  border-bottom: 1px solid #2f3336;
+}
+
+.profile-name {
+  font-size: 20px;
+  font-weight: 700;
+  color: #e7e9ea;
+}
+
+.profile-handle {
+  color: #71767b;
+  font-size: 15px;
+}
+
+.profile-bio {
+  color: #e7e9ea;
+  font-size: 15px;
+  margin-top: 12px;
+}
+
+/* フォローボタン */
+.btn-follow {
+  background-color: #e7e9ea;
+  color: #000000 !important;
+  padding: 8px 16px;
+  border-radius: 9999px;
+  font-weight: 700;
+  font-size: 14px;
+  display: inline-block;
+}
+
+.btn-follow:hover {
+  background-color: #d7dbdc;
+  text-decoration: none;
+}
+
+/* 投稿ヘッダー */
+.post-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 0;
+  border-bottom: 1px solid #2f3336;
+  margin-bottom: 12px;
+}
+
+.post-date {
+  color: #71767b;
+  font-size: 14px;
+}
+
+.post-nav-links {
+  font-size: 14px;
+}
+
+.post-nav-links a {
+  color: #71767b;
+  margin-left: 8px;
+}
+
+.post-nav-links a:hover {
+  color: #1d9bf0;
+}
+
+/* 投稿イントロ */
+.post-intro {
+  color: #71767b;
+  font-size: 15px;
+  padding: 12px 16px;
+  background-color: #16181c;
+  border-radius: 12px;
+  margin-bottom: 16px;
+}
+
+/* ニュースリンク */
+.news-link {
+  display: inline-block;
+  color: #1d9bf0;
+  font-size: 14px;
+  padding: 8px 0;
+}
+
+/* 投稿フッター */
+.post-footer {
+  text-align: center;
+  padding: 24px 0;
+  border-top: 1px solid #2f3336;
+  margin-top: 16px;
+  color: #71767b;
+  font-size: 14px;
+}
+
+.post-footer a {
+  color: #71767b;
+  margin: 0 8px;
+}
+
+.post-footer a:hover {
+  color: #1d9bf0;
+}
+
+/* コード */
+code, pre {
+  background-color: #202327 !important;
+  color: #e7e9ea !important;
+  border: 1px solid #2f3336 !important;
+}
+
+/* モバイル対応 */
+@media screen and (max-width: 600px) {
+  .site-nav {
+    background-color: #000000 !important;
+    border-color: #2f3336 !important;
+  }
+  
+  .site-nav .menu-icon > svg {
+    fill: #e7e9ea !important;
+  }
+}
