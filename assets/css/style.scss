@@ -127,3 +127,55 @@
   background-color: rgba(255, 255, 255, 0.1);
 }
 
+/* 投稿ページヘッダー */
+.post-header-nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1em;
+  margin-bottom: 1em;
+}
+
+.post-date-text {
+  font-weight: normal;
+}
+
+.post-header-links {
+  display: flex;
+  gap: 0.5em;
+}
+
+.post-header-link {
+  padding: 0.5em 1em;
+  border-radius: 8px;
+  transition: background-color 0.2s;
+  display: inline-block;
+}
+
+.post-header-link:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* 投稿ページフッター */
+.post-footer-nav {
+  display: flex;
+  justify-content: center;
+  gap: 2em;
+  flex-wrap: wrap;
+  margin-top: 2em;
+  padding-top: 2em;
+  border-top: 1px solid #333;
+}
+
+.post-footer-link {
+  padding: 0.75em 1.5em;
+  border-radius: 8px;
+  transition: background-color 0.2s;
+  display: inline-block;
+}
+
+.post-footer-link:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
