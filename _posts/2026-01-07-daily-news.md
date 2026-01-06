@@ -11,15 +11,21 @@ Xに収まりきらなかったニュースをお届け 🐱
 
 ---
 
+<div class="news-item" markdown="1">
+
 ### 1. ホワイト・スプレマシスト系出会い系サイトが研究者によって侵入・削除
 
 ホワイト・スプレマシスト系出会い系サイトが研究者によって侵入・削除され、約8,000件のデータが公開されたよ。脆弱なWordPressとAI活用が突破の鍵だったんだって
 
 [![ホワイト・スプレマシスト系出会い系サイト](https://hackread.com/wp-content/uploads/2026/01/white-supremacist-dating-sites-wiped-okstupid-lol-1-800x379.png)](https://hackread.com/white-supremacist-dating-sites-wiped-okstupid-lol/)
 
-🔗 [hackread.com](https://hackread.com/white-supremacist-dating-sites-wiped-okstupid-lol/)
+<a href="https://hackread.com/white-supremacist-dating-sites-wiped-okstupid-lol/" class="news-item-link" target="_blank">🔗 hackread.com</a>
+
+</div>
 
 ---
+
+<div class="news-item" markdown="1">
 
 ### 2. 経験豊富な開発者16名の実験で、AIツール使用時の作業時間が逆に平均19%長くなった
 
@@ -27,9 +33,13 @@ Xに収まりきらなかったニュースをお届け 🐱
 
 [![AI開発者実験](https://fortune.com/img-assets/wp-content/uploads/2024/12/GettyImages-2aborww0.jpg)](https://fortune.com/article/does-ai-increase-workplace-productivity-experiment-software-developers-task-took-longer/)
 
-🔗 [fortune.com](https://fortune.com/article/does-ai-increase-workplace-productivity-experiment-software-developers-task-took-longer/)
+<a href="https://fortune.com/article/does-ai-increase-workplace-productivity-experiment-software-developers-task-took-longer/" class="news-item-link" target="_blank">🔗 fortune.com</a>
+
+</div>
 
 ---
+
+<div class="news-item" markdown="1">
 
 ### 3. Microsoft Edge がCopilot風のAIアプリ化を進めている
 
@@ -37,17 +47,25 @@ Microsoft Edge がCopilot風のAIアプリ化を進めているよ。ブラウ�
 
 [![Microsoft Edge Copilot](https://www.windowscentral.com/sites/wpcentral.com/files/styles/large/public/article_images/2024/01/microsoft-edge-copilot-redesign.jpg)](https://www.windowscentral.com/microsoft/windows-11/microsoft-is-slowly-turning-edge-into-another-copilot-app-tests-redesigned-ui-that-takes-inspiration-from-copilot)
 
-🔗 [windowscentral.com](https://www.windowscentral.com/microsoft/windows-11/microsoft-is-slowly-turning-edge-into-another-copilot-app-tests-redesigned-ui-that-takes-inspiration-from-copilot)
+<a href="https://www.windowscentral.com/microsoft/windows-11/microsoft-is-slowly-turning-edge-into-another-copilot-app-tests-redesigned-ui-that-takes-inspiration-from-copilot" class="news-item-link" target="_blank">🔗 windowscentral.com</a>
+
+</div>
 
 ---
+
+<div class="news-item" markdown="1">
 
 ### 4. CES 2026ではMicro RGBテレビが大きなテーマに
 
 CES 2026ではMicro RGBテレビが大きなテーマになって、AmazonやGoogleもAI連携機能を拡充してきたよ。視聴体験とスマートホームの一体化が進んでるんだよ
 
-🔗 [engadget.com](https://www.engadget.com/general/everything-announced-at-ces-2026-130124802.html?src=rss)
+<a href="https://www.engadget.com/general/everything-announced-at-ces-2026-130124802.html?src=rss" class="news-item-link" target="_blank">🔗 engadget.com</a>
+
+</div>
 
 ---
+
+<div class="news-item" markdown="1">
 
 ### 5. HN投稿の65%がネガティブ判定だったけど、ネガティブ投稿ほど高スコアを獲得
 
@@ -55,9 +73,13 @@ HN投稿の65%がネガティブ判定だったけど、ネガティブ投稿ほ
 
 [![HN Sentiment Analysis](https://philippdubach.com/standalone/hn-sentiment/hn-sentiment-distribution.png)](https://philippdubach.com/standalone/hn-sentiment/)
 
-🔗 [philippdubach.com](https://philippdubach.com/standalone/hn-sentiment/)
+<a href="https://philippdubach.com/standalone/hn-sentiment/" class="news-item-link" target="_blank">🔗 philippdubach.com</a>
+
+</div>
 
 ---
+
+<div class="news-item" markdown="1">
 
 ### 6. SQLite がC言語を使い続ける理由
 
@@ -65,17 +87,25 @@ SQLite がC言語を使い続ける理由を整理していて、高い性能・
 
 [![SQLite](https://sqlite.org/images/sqlite370_banner.gif)](https://sqlite.org/whyc.html)
 
-🔗 [sqlite.org](https://sqlite.org/whyc.html)
+<a href="https://sqlite.org/whyc.html" class="news-item-link" target="_blank">🔗 sqlite.org</a>
+
+</div>
 
 ---
+
+<div class="news-item" markdown="1">
 
 ### 7. Prism.Tools はブラウザだけで動く40以上の開発ツールをまとめたサイト
 
 Prism.Tools はブラウザだけで動く40以上の開発ツールをまとめたサイトだよ。完全クライアント処理でプライバシー重視なのが嬉しいポイントだよ
 
-🔗 [blgardner.github.io](https://blgardner.github.io/prism.tools/)
+<a href="https://blgardner.github.io/prism.tools/" class="news-item-link" target="_blank">🔗 blgardner.github.io</a>
+
+</div>
 
 ---
+
+<div class="news-item" markdown="1">
 
 ### 8. AWSがGPUインスタンス料金を土曜日に約15%値上げ
 
@@ -83,7 +113,9 @@ AWSがGPUインスタンス料金を土曜日に約15%値上げしたよ。告�
 
 [![AWS価格値上げ](https://regmedia.co.uk/2026/01/05/shutterstock_aws.jpg)](https://www.theregister.com/2026/01/05/aws_price_increase/)
 
-🔗 [theregister.com](https://www.theregister.com/2026/01/05/aws_price_increase/)
+<a href="https://www.theregister.com/2026/01/05/aws_price_increase/" class="news-item-link" target="_blank">🔗 theregister.com</a>
+
+</div>
 
 ---
 

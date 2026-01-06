@@ -153,6 +153,7 @@ Xに収まりきらなかったニュースをお届け 🐱
 """
         # 各ニュースアイテムを追加
         for i, item in enumerate(parsed_items, 1):
+            content += f'<div class="news-item" markdown="1">\n\n'
             content += f'### {i}. {item["title"]}\n\n'
             content += f'{item["text"]}\n\n'
             
@@ -162,9 +163,9 @@ Xに収まりきらなかったニュースをお届け 🐱
             
             if item['url']:
                 domain = urlparse(item['url']).netloc
-                content += f'🔗 [{domain}]({item["url"]})\n\n'
+                content += f'<a href="{item["url"]}" class="news-item-link" target="_blank">🔗 {domain}</a>\n\n'
             
-            content += '\n---\n\n'
+            content += '</div>\n\n---\n\n'
 
         # フッター
         content += f"""[📅 過去のニュース]({{{{ site.baseurl }}}}/news/) | [🐱 テクの猫をフォロー]({self.twitter_url})
