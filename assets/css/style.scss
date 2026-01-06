@@ -46,6 +46,16 @@
   z-index: 2;
 }
 
+/* 壊れた画像を隠す */
+.news-item img[alt]:not([src=""]) {
+  font-size: 0;
+}
+
+.news-item img:not([src]), 
+.news-item img[src=""] {
+  display: none;
+}
+
 .post-footer {
   text-align: center;
   margin-top: 2em;
