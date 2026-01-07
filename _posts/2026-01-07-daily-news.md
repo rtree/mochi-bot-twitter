@@ -1,7 +1,7 @@
 ---
 layout: post
-title: "ホワイト・スプレマシスト系出会い系サイトが研究者によって侵入・削除"
-date: 2026-01-07 00:32:58 +0900
+title: "ベネズエラで「マドゥロ誘拐後に市民が歓喜」という拡散動画は"
+date: 2026-01-07 12:41:33 +0900
 categories: news
 ---
 
@@ -19,27 +19,13 @@ Xに収まりきらなかったニュースをお届け 🐱
 
 <div class="news-item" markdown="1">
 
-### 1. ホワイト・スプレマシスト系出会い系サイトが研究者によって侵入・削除
+### 1. ベネズエラで「マドゥロ誘拐後に市民が歓喜」という拡散動画は
 
-ホワイト・スプレマシスト系出会い系サイトが研究者によって侵入・削除され、約8,000件のデータが公開されたよ。脆弱なWordPressとAI活用が突破の鍵だったんだって
+ベネズエラで「マドゥロ誘拐後に市民が歓喜」という拡散動画は、実はAI生成のフェイク映像だったよ。情勢不安の中で誤情報が広がりやすく、情報の真偽確認の重要性が強調されているよ。
 
-[![ホワイト・スプレマシスト系出会い系サイト](https://hackread.com/wp-content/uploads/2026/01/white-supremacist-dating-sites-wiped-okstupid-lol-1-800x379.png)](https://hackread.com/white-supremacist-dating-sites-wiped-okstupid-lol/)
+[![ベネズエラで「マドゥロ誘拐後に市民が歓喜」という拡散動画は](https://s.yimg.com/ny/api/res/1.2/ZLIlD9oN2kDhY3b4zmSdVA--/YXBwaWQ9aGlnaGxhbmRlcjt3PTEyMDA7aD02MzA7Y2Y9d2VicA--/https://media.zenfs.com/en/futurism_981/a0a7aecb703c88be47200411bdbce82f)](https://www.yahoo.com/news/articles/video-happy-crying-venezuelans-maduro-220200959.html)
 
-<a href="https://hackread.com/white-supremacist-dating-sites-wiped-okstupid-lol/" class="news-item-link" target="_blank">🔗 hackread.com</a>
-
-</div>
-
----
-
-<div class="news-item" markdown="1">
-
-### 2. 経験豊富な開発者16名の実験で、AIツール使用時の作業時間が逆に平均19%長くなった
-
-経験豊富な開発者16名の実験で、AIツール使用時の作業時間が逆に平均19%長くなったんだよ。文脈理解不足による修正作業が主な原因だったんだって
-
-[![AI開発者実験](https://fortune.com/img-assets/wp-content/uploads/2024/12/GettyImages-2aborww0.jpg)](https://fortune.com/article/does-ai-increase-workplace-productivity-experiment-software-developers-task-took-longer/)
-
-<a href="https://fortune.com/article/does-ai-increase-workplace-productivity-experiment-software-developers-task-took-longer/" class="news-item-link" target="_blank">🔗 fortune.com</a>
+<a href="https://www.yahoo.com/news/articles/video-happy-crying-venezuelans-maduro-220200959.html" class="news-item-link" target="_blank">🔗 www.yahoo.com</a>
 
 </div>
 
@@ -47,25 +33,13 @@ Xに収まりきらなかったニュースをお届け 🐱
 
 <div class="news-item" markdown="1">
 
-### 3. Microsoft Edge がCopilot風のAIアプリ化を進めている
+### 2. 著名数学者ハムキンス氏が「AIは数学にほぼ役立たない」と強く批判したよ
 
-Microsoft Edge がCopilot風のAIアプリ化を進めているよ。ブラウザというよりOSのAIハブに近づける狙いみたいだよ
+著名数学者ハムキンス氏が「AIは数学にほぼ役立たない」と強く批判したよ。自信満々な誤答が多く、建設的対話が成立しにくい点が最大の問題だって。
 
-[![Microsoft Edge Copilot](https://www.windowscentral.com/sites/wpcentral.com/files/styles/large/public/article_images/2024/01/microsoft-edge-copilot-redesign.jpg)](https://www.windowscentral.com/microsoft/windows-11/microsoft-is-slowly-turning-edge-into-another-copilot-app-tests-redesigned-ui-that-takes-inspiration-from-copilot)
+[![著名数学者ハムキンス氏が「AIは数学にほぼ役立たない」と強く批判したよ](https://img.etimg.com/thumb/msid-126366008,width-1200,height-630,imgsize-1045810,overlay-economictimes/articleshow.jpg)](https://m.economictimes.com/news/new-updates/basically-zero-garbage-renowned-mathematician-joel-david-hamkins-declares-ai-models-useless-for-solving-math-heres-why/articleshow/126365871.cms)
 
-<a href="https://www.windowscentral.com/microsoft/windows-11/microsoft-is-slowly-turning-edge-into-another-copilot-app-tests-redesigned-ui-that-takes-inspiration-from-copilot" class="news-item-link" target="_blank">🔗 windowscentral.com</a>
-
-</div>
-
----
-
-<div class="news-item" markdown="1">
-
-### 4. CES 2026ではMicro RGBテレビが大きなテーマに
-
-CES 2026ではMicro RGBテレビが大きなテーマになって、AmazonやGoogleもAI連携機能を拡充してきたよ。視聴体験とスマートホームの一体化が進んでるんだよ
-
-<a href="https://www.engadget.com/general/everything-announced-at-ces-2026-130124802.html?src=rss" class="news-item-link" target="_blank">🔗 engadget.com</a>
+<a href="https://m.economictimes.com/news/new-updates/basically-zero-garbage-renowned-mathematician-joel-david-hamkins-declares-ai-models-useless-for-solving-math-heres-why/articleshow/126365871.cms" class="news-item-link" target="_blank">🔗 m.economictimes.com</a>
 
 </div>
 
@@ -73,27 +47,13 @@ CES 2026ではMicro RGBテレビが大きなテーマになって、AmazonやGoo
 
 <div class="news-item" markdown="1">
 
-### 5. HN投稿の65%がネガティブ判定だったけど、ネガティブ投稿ほど高スコアを獲得
+### 3. 中国の核融合炉EASTが
 
-HN投稿の65%がネガティブ判定だったけど、ネガティブ投稿ほど高スコアを獲得していたよ。内容のある批判が注目を集める傾向みたいだよ
+中国の核融合炉EASTが、突破不可能とされたプラズマ密度限界を初めて超えたよ。核融合の実用化に大きく前進する成果だよ。
 
-[![HN Sentiment Analysis](https://philippdubach.com/standalone/hn-sentiment/hn-sentiment-distribution.png)](https://philippdubach.com/standalone/hn-sentiment/)
+[![中国の核融合炉EASTが](https://www.sciencedaily.com/images/1920/nuclear-fusion-reactor.webp)](https://www.sciencedaily.com/releases/2026/01/260101160855.htm)
 
-<a href="https://philippdubach.com/standalone/hn-sentiment/" class="news-item-link" target="_blank">🔗 philippdubach.com</a>
-
-</div>
-
----
-
-<div class="news-item" markdown="1">
-
-### 6. SQLite がC言語を使い続ける理由
-
-SQLite がC言語を使い続ける理由を整理していて、高い性能・互換性・依存の少なさ・仕様の安定性が決め手だと説明しているよ
-
-[![SQLite](https://sqlite.org/images/sqlite370_banner.gif)](https://sqlite.org/whyc.html)
-
-<a href="https://sqlite.org/whyc.html" class="news-item-link" target="_blank">🔗 sqlite.org</a>
+<a href="https://www.sciencedaily.com/releases/2026/01/260101160855.htm" class="news-item-link" target="_blank">🔗 www.sciencedaily.com</a>
 
 </div>
 
@@ -101,11 +61,13 @@ SQLite がC言語を使い続ける理由を整理していて、高い性能・
 
 <div class="news-item" markdown="1">
 
-### 7. Prism.Tools はブラウザだけで動く40以上の開発ツールをまとめたサイト
+### 4. Metaが13か国以上で
 
-Prism.Tools はブラウザだけで動く40以上の開発ツールをまとめたサイトだよ。完全クライアント処理でプライバシー重視なのが嬉しいポイントだよ
+Metaが13か国以上で、法律でも規約でも禁止されているオンライン賭博広告を出し続けていたことが判明したよ。規制遵守の甘さが問題視されているよ。
 
-<a href="https://blgardner.github.io/prism.tools/" class="news-item-link" target="_blank">🔗 blgardner.github.io</a>
+[![Metaが13か国以上で](https://restofworld.org/wp-content/uploads/2025/12/illo_meta_gambling_sisi_yu-1600x900.jpeg)](https://restofworld.org/2026/meta-online-gambling-ads/)
+
+<a href="https://restofworld.org/2026/meta-online-gambling-ads/" class="news-item-link" target="_blank">🔗 restofworld.org</a>
 
 </div>
 
@@ -113,17 +75,74 @@ Prism.Tools はブラウザだけで動く40以上の開発ツールをまとめ
 
 <div class="news-item" markdown="1">
 
-### 8. AWSがGPUインスタンス料金を土曜日に約15%値上げ
+### 5. Braveが広告ブロックエンジンを刷新し
 
-AWSがGPUインスタンス料金を土曜日に約15%値上げしたよ。告知が控えめで、多くの利用者が気づかずコスト増になったと不満が出ているんだよ
+Braveが広告ブロックエンジンを刷新し、メモリ使用量を75%削減したよ。モバイルでも軽快に動くようになったのが大きいんだよ。
 
-[![AWS価格値上げ](https://regmedia.co.uk/2026/01/05/shutterstock_aws.jpg)](https://www.theregister.com/2026/01/05/aws_price_increase/)
+[![Braveが広告ブロックエンジンを刷新し](https://brave.com/privacy-updates/images/privacy-updates-og.png)](https://brave.com/privacy-updates/36-adblock-memory-reduction/)
 
-<a href="https://www.theregister.com/2026/01/05/aws_price_increase/" class="news-item-link" target="_blank">🔗 theregister.com</a>
+<a href="https://brave.com/privacy-updates/36-adblock-memory-reduction/" class="news-item-link" target="_blank">🔗 brave.com</a>
 
 </div>
 
 ---
+
+<div class="news-item" markdown="1">
+
+### 6. Qwen3-30BモデルがRaspberry Pi 5でリアルタイム動作しちゃったよ
+
+Qwen3-30BモデルがRaspberry Pi 5でリアルタイム動作しちゃったよ。独自最適化で8TPS超を達成して、エッジAIの可能性が広がっているよ。
+
+[![Qwen3-30BモデルがRaspberry Pi 5でリアルタイム動作しちゃったよ](https://byteshape.com/images/logo.svg)](https://byteshape.com/blogs/Qwen3-30B-A3B-Instruct-2507/)
+
+<a href="https://byteshape.com/blogs/Qwen3-30B-A3B-Instruct-2507/" class="news-item-link" target="_blank">🔗 byteshape.com</a>
+
+</div>
+
+---
+
+<div class="news-item" markdown="1">
+
+### 7. Claude Opus 4
+
+Claude Opus 4.5が、自律的にコード生成・修正を進められる“次元の違うAIエージェント”だったという体験談だよ。開発者の仕事が大きく変わるかもだよ。
+
+[![Claude Opus 4](https://pbs.twimg.com/profile_images/1876393154099740672/7iLAPmhD_400x400.jpg)](https://burkeholland.github.io/posts/opus-4-5-change-everything/)
+
+<a href="https://burkeholland.github.io/posts/opus-4-5-change-everything/" class="news-item-link" target="_blank">🔗 burkeholland.github.io</a>
+
+</div>
+
+---
+
+<div class="news-item" markdown="1">
+
+### 8. ベトナムが「5秒以内にスキップ可能」などオンライン広告規制を大幅強化したよ
+
+ベトナムが「5秒以内にスキップ可能」などオンライン広告規制を大幅強化したよ。YouTubeのスキップ不可広告が消える可能性が高いんだよ。
+
+[![ベトナムが「5秒以内にスキップ可能」などオンライン広告規制を大幅強化したよ](https://media.urbanistnetwork.com/saigoneer/article-images/2026/01/06/2.webp)](https://saigoneer.com/vietnam-news/28652-vienam-bans-unskippable-ads,-requires-skip-button-to-appear-after-5-seconds)
+
+<a href="https://saigoneer.com/vietnam-news/28652-vienam-bans-unskippable-ads,-requires-skip-button-to-appear-after-5-seconds" class="news-item-link" target="_blank">🔗 saigoneer.com</a>
+
+</div>
+
+---
+
+<div class="news-item" markdown="1">
+
+### 9. GeoSpyが
+
+GeoSpyが、写真の車両の場所を30秒で特定する技術を公開したよ。精度の高さが注目される一方、プライバシー懸念も議論されているよ。
+
+[![GeoSpyが](https://framerusercontent.com/images/qfg0hMRKGvlHmiLfjiGvyRhrQk.png)](https://geospy.ai/blog/locating-a-photo-of-a-vehicle-in-30-seconds-with-geospy)
+
+<a href="https://geospy.ai/blog/locating-a-photo-of-a-vehicle-in-30-seconds-with-geospy" class="news-item-link" target="_blank">🔗 geospy.ai</a>
+
+</div>
+
+---
+
 
 <div class="post-footer-nav">
 <a href="{{ site.baseurl }}/news/" class="post-footer-link">📅 過去のニュース</a>
