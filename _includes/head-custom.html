@@ -1,3 +1,18 @@
 ---
 ---
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🐱</text></svg>">
+
+<script>
+// 壊れた画像を非表示にする
+document.addEventListener('DOMContentLoaded', function() {
+  document.querySelectorAll('.news-item img').forEach(function(img) {
+    img.onerror = function() {
+      this.style.display = 'none';
+      // 親のリンクも隠す
+      if (this.parentElement.tagName === 'A') {
+        this.parentElement.style.display = 'none';
+      }
+    };
+  });
+});
+</script>

@@ -5,13 +5,36 @@
 /* カスタムスタイル */
 
 .news-item {
-  margin-bottom: 2em;
-  padding-bottom: 1em;
-  border-bottom: 1px solid #333;
+  position: relative;
+  margin-bottom: 1em;
+  padding: 1em;
+  border-radius: 8px;
+  transition: background-color 0.2s;
 }
 
-.news-item:last-child {
-  border-bottom: none;
+.news-item:hover {
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+/* 記事全体をクリッカブルに */
+.news-item-link {
+  position: static;
+}
+
+.news-item-link::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1;
+}
+
+/* 画像リンクは独立してクリック可能 */
+.news-item a:not(.news-item-link) {
+  position: relative;
+  z-index: 2;
 }
 
 .news-item img {
@@ -19,6 +42,18 @@
   border-radius: 8px;
   margin: 1em 0;
   display: block;
+  position: relative;
+  z-index: 2;
+}
+
+/* 壊れた画像を隠す */
+.news-item img[alt]:not([src=""]) {
+  font-size: 0;
+}
+
+.news-item img:not([src]), 
+.news-item img[src=""] {
+  display: none;
 }
 
 .post-footer {
@@ -27,5 +62,120 @@
   padding-top: 1em;
   border-top: 1px solid #333;
   color: #888;
+}
+
+/* ナビゲーションリンク */
+.nav-links {
+  display: flex;
+  gap: 1em;
+  flex-wrap: wrap;
+  margin: 1em 0;
+}
+
+.nav-link-item {
+  position: relative;
+  padding: 0.5em 1em;
+  border-radius: 8px;
+  transition: background-color 0.2s;
+  display: inline-block;
+}
+
+.nav-link-item:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* 投稿リストアイテム */
+.post-list-item {
+  position: relative;
+  padding: 0.75em 1em;
+  margin: 0.5em 0;
+  border-radius: 8px;
+  transition: background-color 0.2s;
+}
+
+.post-list-item:hover {
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+.post-list-link {
+  position: static;
+}
+
+.post-list-link::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1;
+}
+
+/* すべて見るリンク */
+.view-all {
+  margin: 1.5em 0;
+}
+
+.view-all-link {
+  display: inline-block;
+  padding: 0.75em 1.5em;
+  border-radius: 8px;
+  transition: background-color 0.2s;
+}
+
+.view-all-link:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* 投稿ページヘッダー */
+.post-header-nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1em;
+  margin-bottom: 1em;
+}
+
+.post-date-text {
+  font-weight: normal;
+}
+
+.post-header-links {
+  display: flex;
+  gap: 0.5em;
+}
+
+.post-header-link {
+  padding: 0.5em 1em;
+  border-radius: 8px;
+  transition: background-color 0.2s;
+  display: inline-block;
+}
+
+.post-header-link:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* 投稿ページフッター */
+.post-footer-nav {
+  display: flex;
+  justify-content: center;
+  gap: 2em;
+  flex-wrap: wrap;
+  margin-top: 2em;
+  padding-top: 2em;
+  border-top: 1px solid #333;
+}
+
+.post-footer-link {
+  padding: 0.75em 1.5em;
+  border-radius: 8px;
+  transition: background-color 0.2s;
+  display: inline-block;
+}
+
+.post-footer-link:hover {
+  background-color: rgba(255, 255, 255, 0.1);
 }
 
