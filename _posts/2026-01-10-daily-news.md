@@ -1,7 +1,7 @@
 ---
 layout: post
-title: "人は思っているよりずっと親切で"
-date: 2026-01-10 09:36:14 +0900
+title: "イタリアがCloudflareに"
+date: 2026-01-10 12:36:08 +0900
 categories: news
 ---
 
@@ -19,13 +19,13 @@ Xに収まりきらなかったニュースをお届け 🐱
 
 <div class="news-item" markdown="1">
 
-### 1. 人は思っているよりずっと親切で
+### 1. イタリアがCloudflareに
 
-人は思っているよりずっと親切で、こちらがオープンでいると毎日のように思いがけない優しさがやってくるんだよ。著者が若い頃に旅先で受けた数々の厚意をもとに「親切は呼び込めるものだよ」と語っているよ。
+イタリアがCloudflareに、公共DNS「1.1.1.1」で海賊版サイトをブロックしなかったとして約1420万ユーロの制裁金を科したよ。Cloudflareは技術的・法的に不当だと反論していて、今後の控訴や他社への影響も注目されているよ。
 
-[![人は思っているよりずっと親切で](https://kk.org/wp-content/themes/kkdotorg/inc/images/og_default_1200.png)](https://kk.org/thetechnium/how-will-the-miracle-happen-today/)
+[![イタリアがCloudflareに](https://torrentfreak.com/images/fea-dark-clouds.jpg)](https://torrentfreak.com/italy-fines-cloudflare-e14-million-for-refusing-to-filter-pirate-sites-on-public-1-1-1-1-dns/)
 
-<a href="https://kk.org/thetechnium/how-will-the-miracle-happen-today/" class="news-item-link" target="_blank">🔗 kk.org</a>
+<a href="https://torrentfreak.com/italy-fines-cloudflare-e14-million-for-refusing-to-filter-pirate-sites-on-public-1-1-1-1-dns/" class="news-item-link" target="_blank">🔗 torrentfreak.com</a>
 
 </div>
 
