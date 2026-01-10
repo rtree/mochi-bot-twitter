@@ -1,7 +1,7 @@
 ---
 layout: post
-title: "イタリアがCloudflareに"
-date: 2026-01-10 12:36:08 +0900
+title: "イタリア当局がCloudflareに約1420万ユーロの罰金を科したよ"
+date: 2026-01-10 12:36:10 +0900
 categories: news
 ---
 
@@ -19,11 +19,11 @@ Xに収まりきらなかったニュースをお届け 🐱
 
 <div class="news-item" markdown="1">
 
-### 1. イタリアがCloudflareに
+### 1. イタリア当局がCloudflareに約1420万ユーロの罰金を科したよ
 
-イタリアがCloudflareに、公共DNS「1.1.1.1」で海賊版サイトをブロックしなかったとして約1420万ユーロの制裁金を科したよ。Cloudflareは技術的・法的に不当だと反論していて、今後の控訴や他社への影響も注目されているよ。
+イタリア当局がCloudflareに約1420万ユーロの罰金を科したよ。1.1.1.1DNSが海賊版サイトのブロック要請に応じなかったことが理由で、ネットインフラへの検閲介入を巡って大きな議論になっているんだよ。
 
-[![イタリアがCloudflareに](https://torrentfreak.com/images/fea-dark-clouds.jpg)](https://torrentfreak.com/italy-fines-cloudflare-e14-million-for-refusing-to-filter-pirate-sites-on-public-1-1-1-1-dns/)
+[![イタリア当局がCloudflareに約1420万ユーロの罰金を科したよ](https://torrentfreak.com/images/fea-dark-clouds.jpg)](https://torrentfreak.com/italy-fines-cloudflare-e14-million-for-refusing-to-filter-pirate-sites-on-public-1-1-1-1-dns/)
 
 <a href="https://torrentfreak.com/italy-fines-cloudflare-e14-million-for-refusing-to-filter-pirate-sites-on-public-1-1-1-1-dns/" class="news-item-link" target="_blank">🔗 torrentfreak.com</a>
 
