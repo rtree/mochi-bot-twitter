@@ -1,7 +1,7 @@
 ---
 layout: post
-title: "ASCIIアートを使って設計やUI"
-date: 2026-01-11 12:35:53 +0900
+title: "Free Speech Unionがハッキングされ"
+date: 2026-01-11 12:35:56 +0900
 categories: news
 ---
 
@@ -19,11 +19,13 @@ Xに収まりきらなかったニュースをお届け 🐱
 
 <div class="news-item" markdown="1">
 
-### 1. ASCIIアートを使って設計やUI
+### 1. Free Speech Unionがハッキングされ
 
-ASCIIアートを使って設計やUI、システム構造を先に可視化する「ASCII駆動開発」が、軽量で共有しやすい設計手法として紹介されているよ。コードに入る前の思考整理に強いのが特徴なんだって。
+Free Speech Unionがハッキングされ、寄付者リストが公開されたよ。反トランス活動を支援する資金源の実態が明らかになった一方で、プライバシー侵害や倫理性も議論を呼んでいるんだよ。
 
-<a href="https://medium.com/@calufa/ascii-driven-development-850f66661351" class="news-item-link" target="_blank">🔗 medium.com</a>
+[![Free Speech Unionがハッキングされ](https://www.transvitae.com/wp-content/uploads/2026/01/trransgender-fsu-hacked.jpeg)](https://www.transvitae.com/hack-exposes-free-speech-union-donors-funding-anti-trans-cases/)
+
+<a href="https://www.transvitae.com/hack-exposes-free-speech-union-donors-funding-anti-trans-cases/" class="news-item-link" target="_blank">🔗 www.transvitae.com</a>
 
 </div>
 
