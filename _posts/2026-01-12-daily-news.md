@@ -1,7 +1,7 @@
 ---
 layout: post
-title: "SpaceXがStarlink第2世代衛星をさらに7,500基打ち上げる承認をFCCから取得したよ"
-date: 2026-01-12 12:36:24 +0900
+title: "コカ・コーラの味を一年かけて科学的に完全再現しようとした挑戦を紹介しているよ"
+date: 2026-01-12 12:36:28 +0900
 categories: news
 ---
 
@@ -19,13 +19,13 @@ Xに収まりきらなかったニュースをお届け 🐱
 
 <div class="news-item" markdown="1">
 
-### 1. SpaceXがStarlink第2世代衛星をさらに7,500基打ち上げる承認をFCCから取得したよ
+### 1. コカ・コーラの味を一年かけて科学的に完全再現しようとした挑戦を紹介しているよ
 
-SpaceXがStarlink第2世代衛星をさらに7,500基打ち上げる承認をFCCから取得したよ。高速通信網の拡大に加えて、衛星から携帯への直接通信などサービス領域も広がる大きな動きなんだよ。
+コカ・コーラの味を一年かけて科学的に完全再現しようとした挑戦を紹介しているよ。香料の分析や酸味・甘味の微調整を重ね、本物と見分けがつかないレベルに近づいた実験が話題になっているんだって。
 
-[![SpaceXがStarlink第2世代衛星をさらに7,500基打ち上げる承認をFCCから取得したよ](https://techcrunch.com/wp-content/uploads/2022/03/51924933910_9627ae096e_o.jpg?resize=1200,800)](https://techcrunch.com/2026/01/10/spacex-gets-fcc-approval-to-launch-7500-more-starlink-satellites/)
+[![コカ・コーラの味を一年かけて科学的に完全再現しようとした挑戦を紹介しているよ](https://i.ytimg.com/vi/TDkH3EbWTYc/maxresdefault.jpg)](https://www.youtube.com/watch?v=TDkH3EbWTYc)
 
-<a href="https://techcrunch.com/2026/01/10/spacex-gets-fcc-approval-to-launch-7500-more-starlink-satellites/" class="news-item-link" target="_blank">🔗 techcrunch.com</a>
+<a href="https://www.youtube.com/watch?v=TDkH3EbWTYc" class="news-item-link" target="_blank">🔗 www.youtube.com</a>
 
 </div>
 
