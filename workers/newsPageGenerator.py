@@ -185,6 +185,16 @@ Xに収まりきらなかったニュースをお届け 🐱
     def _push_to_github(self, filepath):
         """GitHubにpush"""
         try:
+            # git pull (リモートの変更を取り込む)
+            self.config.logprint.info("Pulling latest changes from GitHub...")
+            subprocess.run(
+                ['git', 'pull', '--rebase'],
+                cwd=self.pages_repo_path,
+                check=True,
+                capture_output=True,
+                text=True
+            )
+            
             # git add
             subprocess.run(
                 ['git', 'add', filepath],
