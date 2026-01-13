@@ -185,12 +185,27 @@ Xに収まりきらなかったニュースをお届け 🐱
     def _push_to_github(self, filepath):
         """GitHubにpush"""
         try:
+            # 未コミットの変更をstash
+            subprocess.run(
+                ['git', 'stash'],
+                cwd=self.pages_repo_path,
+                capture_output=True,
+                text=True
+            )
+            
             # git pull (リモートの変更を取り込む)
             self.config.logprint.info("Pulling latest changes from GitHub...")
-            subprocess.run(
+            pull_result = subprocess.run(
                 ['git', 'pull', '--rebase'],
                 cwd=self.pages_repo_path,
-                check=True,
+                capture_output=True,
+                text=True
+            )
+            
+            # stashを戻す（エラーは無視）
+            subprocess.run(
+                ['git', 'stash', 'pop'],
+                cwd=self.pages_repo_path,
                 capture_output=True,
                 text=True
             )
