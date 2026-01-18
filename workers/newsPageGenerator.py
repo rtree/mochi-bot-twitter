@@ -168,8 +168,16 @@ Xに収まりきらなかったニュースをお届け 🐱
                 content += f'[![{item["title"]}]({item["ogp_image"]})]({item["url"]})\n\n'
             
             if item['url']:
+                from urllib.parse import quote
                 domain = urlparse(item['url']).netloc
-                content += f'<a href="{item["url"]}" class="news-item-link" target="_blank">🔗 {domain}</a>\n\n'
+                encoded_url = quote(item['url'], safe='')
+                encoded_text = quote(f'{item["title"]} ', safe='')
+                
+                content += f'<div class="news-actions">\n'
+                content += f'<a href="{item["url"]}" class="news-item-link" target="_blank">🔗 {domain}</a>\n'
+                content += f'<a href="https://twitter.com/intent/tweet?url={encoded_url}&text={encoded_text}" class="twitter-action-btn" target="_blank" rel="noopener noreferrer">🔁 リツイート</a>\n'
+                content += f'<a href="https://twitter.com/intent/tweet?url={encoded_url}&text={encoded_text}" class="twitter-action-btn quote-btn" target="_blank" rel="noopener noreferrer">💬 引用</a>\n'
+                content += f'</div>\n\n'
             
             content += '</div>\n\n---\n\n'
 

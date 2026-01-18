@@ -37,6 +37,48 @@
   z-index: 2;
 }
 
+/* ニュースアクション（リンク+ボタン） */
+.news-actions {
+  display: flex;
+  gap: 0.5em;
+  flex-wrap: wrap;
+  align-items: center;
+  margin-top: 0.5em;
+  position: relative;
+  z-index: 2;
+}
+
+.news-actions a {
+  position: relative;
+  z-index: 2;
+}
+
+.twitter-action-btn {
+  padding: 0.4em 0.8em;
+  border-radius: 6px;
+  background-color: rgba(29, 161, 242, 0.1);
+  border: 1px solid rgba(29, 161, 242, 0.3);
+  transition: all 0.2s;
+  font-size: 0.9em;
+  white-space: nowrap;
+}
+
+.twitter-action-btn:hover {
+  background-color: rgba(29, 161, 242, 0.2);
+  border-color: rgba(29, 161, 242, 0.5);
+  transform: translateY(-1px);
+}
+
+.twitter-action-btn.quote-btn {
+  background-color: rgba(0, 186, 124, 0.1);
+  border-color: rgba(0, 186, 124, 0.3);
+}
+
+.twitter-action-btn.quote-btn:hover {
+  background-color: rgba(0, 186, 124, 0.2);
+  border-color: rgba(0, 186, 124, 0.5);
+}
+
 .news-item img {
   max-width: 100%;
   border-radius: 8px;
