@@ -156,7 +156,15 @@ class Processor:
         for content in contents:
             if content.strip():
                 cleaned_content = content.split(self.config.FETCHER_END_OF_CONTENT)[0].strip()
-                cleaned_contents.append(cleaned_content)
+                # URL: N/A や URL が含まれていないコンテンツをスキップ
+                if 'URL: N/A' in cleaned_content or 'URL:N/A' in cleaned_content:
+                    self.config.logprint.warning(f"Skipping content without valid URL: {cleaned_content[:100]}...")
+                    continue
+                # URL行が存在することを確認（最低限のチェック）
+                if 'URL:' in cleaned_content:
+                    cleaned_contents.append(cleaned_content)
+                else:
+                    self.config.logprint.warning(f"Skipping content without URL field: {cleaned_content[:100]}...")
         return cleaned_contents
 
     # async def summarize_results_after_each_summary_async(self, raw_content):
