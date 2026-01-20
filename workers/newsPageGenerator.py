@@ -160,8 +160,14 @@ Xに収まりきらなかったニュースをお届け 🐱
         # 各ニュースアイテムを追加
         for i, item in enumerate(parsed_items, 1):
             content += f'<div class="news-item" markdown="1">\n\n'
-            content += f'### {i}. {item["title"]}\n\n'
-            content += f'{item["text"]}\n\n'
+            
+            # タイトルと本文をクリッカブルに
+            if item['url']:
+                content += f'### {i}. [{item["title"]}]({item["url"]})\n\n'
+                content += f'[{item["text"]}]({item["url"]})\n\n'
+            else:
+                content += f'### {i}. {item["title"]}\n\n'
+                content += f'{item["text"]}\n\n'
             
             # OGP画像があれば表示（クリッカブル）
             if item['ogp_image'] and item['url']:
