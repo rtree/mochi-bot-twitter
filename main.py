@@ -11,6 +11,7 @@ from workers.redditFetcher import RedditFetcher
 from workers.bingFetcher import BingFetcher
 from workers.hackerNewsRssFetcher import HackerNewsRssFetcher
 from workers.googleFetcher import GoogleFetcher
+from workers.moltbookFetcher import MoltbookFetcher
 from workers.newsPageGenerator import NewsPageGenerator
 from workers.deduplicator import NewsDeduplicator
 
@@ -27,6 +28,7 @@ async def run_bot():
                         GoogleFetcher(context, config),
                         RedditFetcher(context, config),
                         HackerNewsRssFetcher(context, config),
+                        MoltbookFetcher(context, config),  # AI Agent SNS
                        ]
 
             for fetcher in fetchers:
@@ -105,6 +107,37 @@ async def run_bot():
             news_generator.generate_and_publish(summary_deduplicated, f_urls_merged)
             config.logprint.info("GitHub Pages publishing completed.")
 
+        # Moltbookへの投稿
+        if config.MOLTBOOK_DO_POST:
+            config.logprint.info("Starting Moltbook posting...")
+            try:
+                moltbook_poster = MoltbookFetcher(context, config)
+                
+                # 今日の日付
+                today = datetime.now().strftime("%Y-%m-%d")
+                
+                # タイトルと内容を生成
+                title = f"📰 AI News Digest - {today}"
+                
+                # 最初の5件のニュースを抜粋
+                news_preview = all_tweets[:5]
+                news_content = "\n\n".join([f"• {tweet[:150]}..." if len(tweet) > 150 else f"• {tweet}" for tweet in news_preview])
+                
+                content = (
+                    f"{news_content}\n\n"
+                    f"📖 Full digest: https://rtree.github.io/mochi-bot-twitter/\n\n"
+                    f"🐦 Follow me on X: https://x.com/techandeco4242\n\n"
+                    f"#AI #AINews #DailyDigest"
+                )
+                
+                result = await moltbook_poster.post(title, content, submolt="general")
+                if result:
+                    config.logprint.info(f"Moltbook posting completed: {result.get('url')}")
+                else:
+                    config.logprint.error("Moltbook posting failed.")
+            except Exception as e:
+                config.elogprint.error(f"Error posting to Moltbook: {str(e)}")
+
     except Exception as e:
         config.elogprint.error(f"API Call Error: {str(e)}")
         return f"Error: {str(e)}"
@@ -121,5 +154,8 @@ if __name__ == "__main__":
 
     if not ('nopages' in sys.argv):
         Config.PAGES_DO_PUBLISH = True
+
+    if not ('nomoltbook' in sys.argv):
+        Config.MOLTBOOK_DO_POST = True
 
     asyncio.run(run_bot())

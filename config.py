@@ -16,6 +16,8 @@ class Config:
     PROCESSOR_DO_EACH_SUMMARY = False 
     # if argument 'nopages'   is not in sys.argv, set to True -> publish to GitHub Pages
     PAGES_DO_PUBLISH          = False 
+    # if argument 'nomoltbook' is not in sys.argv, set to True -> post to Moltbook
+    MOLTBOOK_DO_POST          = False
 
     OPENAI_API_KEY        = os.getenv('OPENAI_API_KEY')
     OPENAI_GPT_MODEL      = os.getenv('OPENAI_GPT_MODEL')
@@ -38,13 +40,16 @@ class Config:
     REDDIT_CLIENT_SECRET  = os.getenv('REDDIT_CLIENT_SECRET')
     REDDIT_USERNAME       = os.getenv('REDDIT_USERNAME')
     REDDIT_PASSWORD       = os.getenv('REDDIT_PASSWORD')
-    REDDIT_SEARCH_RESULTS = 6
+    REDDIT_SEARCH_RESULTS = 3  # Reduced from 6 to avoid overlap with HN
 
     GROK_API_KEY          = os.getenv('GROK_API_KEY')
     GROK_MODEL            = os.getenv('GROK_MODEL')
 
     HACKER_NEWS_COMMENTS  = 30
     HACKER_NEWS_POINTS    = 95
+
+    MOLTBOOK_API_KEY      = os.getenv('MOLTBOOK_API_KEY')  # Optional - for authenticated requests
+    MOLTBOOK_SEARCH_RESULTS = 10
 
     TWITTER_API_KEY       = os.getenv('TWITTER_API_KEY')
     TWITTER_API_SECRET    = os.getenv('TWITTER_API_SECRET')
