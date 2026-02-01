@@ -76,14 +76,24 @@ class MoltbookFetcher:
                     else:
                         data = await response.json()
                     
+                    # Check if data is None or empty
+                    if data is None:
+                        self.config.logprint.error("Moltbook API returned None")
+                        return None
+                    
                     # Parse the response
                     posts = []
                     urls = []
                     
                     # Handle different response formats
-                    post_list = data.get("data", data.get("posts", data if isinstance(data, list) else []))
-                    if isinstance(post_list, dict):
-                        post_list = post_list.get("posts", [])
+                    if isinstance(data, list):
+                        post_list = data
+                    elif isinstance(data, dict):
+                        post_list = data.get("data", data.get("posts", []))
+                        if isinstance(post_list, dict):
+                            post_list = post_list.get("posts", [])
+                    else:
+                        post_list = []
                     
                     for post in post_list:
                         post_data = {

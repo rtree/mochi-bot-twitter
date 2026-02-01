@@ -206,7 +206,7 @@ Output only the English bullet points, nothing else.
                     {"role": "system", "content": "You are a professional tech news translator and summarizer."},
                     {"role": "user", "content": prompt}
                 ],
-                max_tokens=500,
+                max_completion_tokens=500,
                 temperature=0.3
             )
             
