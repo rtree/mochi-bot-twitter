@@ -167,6 +167,58 @@ class Processor:
                     self.config.logprint.warning(f"Skipping content without URL field: {cleaned_content[:100]}...")
         return cleaned_contents
 
+    async def generate_english_summary_async(self, news_items):
+        """
+        Generate an English summary of news items for Moltbook posting.
+        
+        Args:
+            news_items: List of news summary strings (in Japanese)
+            
+        Returns:
+            English summary string
+        """
+        if not news_items:
+            return "No news items available today."
+        
+        # Combine news items
+        news_text = "\n\n".join([f"- {item}" for item in news_items])
+        
+        prompt = f"""
+You are a professional tech news summarizer. Translate and summarize the following Japanese AI/tech news items into concise English bullet points.
+
+Requirements:
+- Write in clear, professional English
+- Each bullet point should be 1-2 sentences max
+- Focus on the key facts and implications
+- Use bullet points (•) for formatting
+- Keep the total summary under 800 characters
+
+Japanese news items to summarize:
+{news_text}
+
+Output only the English bullet points, nothing else.
+"""
+        
+        try:
+            response = self.aiclient.chat.completions.create(
+                model=self.config.OPENAI_GPT_MODEL,
+                messages=[
+                    {"role": "system", "content": "You are a professional tech news translator and summarizer."},
+                    {"role": "user", "content": prompt}
+                ],
+                max_tokens=500,
+                temperature=0.3
+            )
+            
+            english_summary = response.choices[0].message.content.strip()
+            self.config.logprint.info(f"Generated English summary: {english_summary[:100]}...")
+            return english_summary
+            
+        except Exception as e:
+            self.config.logprint.error(f"Error generating English summary: {str(e)}")
+            # Fallback: return simple placeholder
+            return "Today's AI news highlights from around the web."
+
     # async def summarize_results_after_each_summary_async(self, raw_content):
     #     contents = self.split_contents(raw_content)
     #     final_summary = await self.summarize_each_result_async(contents)

@@ -107,7 +107,7 @@ async def run_bot():
             news_generator.generate_and_publish(summary_deduplicated, f_urls_merged)
             config.logprint.info("GitHub Pages publishing completed.")
 
-        # Moltbookへの投稿
+        # Moltbookへの投稿（英語で）
         if config.MOLTBOOK_DO_POST:
             config.logprint.info("Starting Moltbook posting...")
             try:
@@ -116,15 +116,15 @@ async def run_bot():
                 # 今日の日付
                 today = datetime.now().strftime("%Y-%m-%d")
                 
-                # タイトルと内容を生成
+                # タイトル
                 title = f"📰 AI News Digest - {today}"
                 
-                # 最初の5件のニュースを抜粋
-                news_preview = all_tweets[:5]
-                news_content = "\n\n".join([f"• {tweet[:150]}..." if len(tweet) > 150 else f"• {tweet}" for tweet in news_preview])
+                # 英語でニュースサマリーを生成
+                config.logprint.info("Generating English summary for Moltbook...")
+                english_summary = await processor.generate_english_summary_async(all_tweets[:5])
                 
                 content = (
-                    f"{news_content}\n\n"
+                    f"{english_summary}\n\n"
                     f"📖 Full digest: https://rtree.github.io/mochi-bot-twitter/\n\n"
                     f"🐦 Follow me on X: https://x.com/techandeco4242\n\n"
                     f"#AI #AINews #DailyDigest"
