@@ -206,7 +206,7 @@ Output only the English bullet points, nothing else.
                     {"role": "system", "content": "You are a professional tech news translator and summarizer."},
                     {"role": "user", "content": prompt}
                 ],
-                max_completion_tokens=500,
+                max_completion_tokens=50000,
                 temperature=0.3
             )
             
@@ -217,6 +217,90 @@ Output only the English bullet points, nothing else.
         except Exception as e:
             self.config.logprint.error(f"Error generating English summary: {str(e)}")
             # Fallback: return simple placeholder
+            return "Today's AI news highlights from around the web."
+
+    async def generate_moltbook_content_async(self, news_items):
+        """
+        Generate detailed English content for Moltbook posting.
+        Includes full news summaries with URLs, similar to GitHub Pages format.
+        
+        Args:
+            news_items: List of news summary strings (in Japanese, with URLs)
+            
+        Returns:
+            Detailed English content string for Moltbook
+        """
+        if not news_items:
+            return "No news items available today."
+        
+        # Parse news items to extract text and URLs
+        import re
+        parsed_items = []
+        for item in news_items:
+            item = item.strip()
+            url_match = re.search(r'(https?://[^\s]+)', item)
+            url = url_match.group(1) if url_match else None
+            text = item.replace(url, '').strip() if url else item
+            parsed_items.append({'text': text, 'url': url})
+        
+        # Combine for translation
+        news_text = "\n\n".join([f"- {item['text']}" for item in parsed_items])
+        
+        prompt = f"""
+You are a professional tech news translator. Translate each of the following Japanese AI/tech news items into clear English.
+
+Requirements:
+- Translate each item faithfully and completely
+- Keep the same structure (one item per bullet)
+- Write 2-3 sentences per item to capture the key points
+- Use professional, clear English
+- Number each item (1., 2., 3., etc.)
+- Do NOT add URLs - I will add them separately
+
+Japanese news items:
+{news_text}
+
+Output the translated items numbered, nothing else.
+"""
+        
+        try:
+            response = self.aiclient.chat.completions.create(
+                model=self.config.OPENAI_GPT_MODEL,
+                messages=[
+                    {"role": "system", "content": "You are a professional tech news translator."},
+                    {"role": "user", "content": prompt}
+                ],
+                max_completion_tokens=2000,
+                temperature=0.3
+            )
+            
+            translated = response.choices[0].message.content.strip()
+            
+            # Add URLs back to each item
+            lines = translated.split('\n')
+            result_lines = []
+            url_index = 0
+            
+            for line in lines:
+                line = line.strip()
+                if not line:
+                    continue
+                result_lines.append(line)
+                # Add URL after each numbered item
+                if line and line[0].isdigit() and url_index < len(parsed_items):
+                    url = parsed_items[url_index].get('url')
+                    if url:
+                        result_lines.append(f"🔗 {url}")
+                        result_lines.append("")  # Empty line for spacing
+                    url_index += 1
+            
+            content = "\n".join(result_lines)
+            self.config.logprint.info(f"Generated Moltbook content: {content[:200]}...")
+            return content
+            
+        except Exception as e:
+            self.config.logprint.error(f"Error generating Moltbook content: {str(e)}")
+            # Fallback
             return "Today's AI news highlights from around the web."
 
     # async def summarize_results_after_each_summary_async(self, raw_content):

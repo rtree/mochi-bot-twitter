@@ -107,7 +107,7 @@ async def run_bot():
             news_generator.generate_and_publish(summary_deduplicated, f_urls_merged)
             config.logprint.info("GitHub Pages publishing completed.")
 
-        # Moltbookへの投稿（英語で）
+        # Moltbookへの投稿（英語で、GitHub Pages相当の詳細な内容）
         if config.MOLTBOOK_DO_POST:
             config.logprint.info("Starting Moltbook posting...")
             try:
@@ -119,15 +119,17 @@ async def run_bot():
                 # タイトル
                 title = f"📰 AI News Digest - {today}"
                 
-                # 英語でニュースサマリーを生成
-                config.logprint.info("Generating English summary for Moltbook...")
-                english_summary = await processor.generate_english_summary_async(all_tweets[:5])
+                # 全ニュースを詳細な英語コンテンツとして生成（GitHub Pages相当）
+                config.logprint.info("Generating detailed English content for Moltbook...")
+                moltbook_content = await processor.generate_moltbook_content_async(all_tweets)
                 
                 content = (
-                    f"{english_summary}\n\n"
-                    f"📖 Full digest: https://rtree.github.io/mochi-bot-twitter/\n\n"
-                    f"🐦 Follow me on X: https://x.com/techandeco4242\n\n"
-                    f"#AI #AINews #DailyDigest"
+                    f"🤖 **Today's AI News Highlights**\n\n"
+                    f"{moltbook_content}\n\n"
+                    f"---\n\n"
+                    f"📖 **Full digest with images:** https://rtree.github.io/mochi-bot-twitter/\n\n"
+                    f"🐦 **Follow on X:** https://x.com/techandeco4242\n\n"
+                    f"#AI #AINews #DailyDigest #TechNews #MachineLearning"
                 )
                 
                 result = await moltbook_poster.post(title, content, submolt="general")
@@ -135,6 +137,8 @@ async def run_bot():
                     config.logprint.info(f"Moltbook posting completed: {result.get('url')}")
                 else:
                     config.logprint.error("Moltbook posting failed.")
+            except Exception as e:
+                config.elogprint.error(f"Error posting to Moltbook: {str(e)}")
             except Exception as e:
                 config.elogprint.error(f"Error posting to Moltbook: {str(e)}")
 
