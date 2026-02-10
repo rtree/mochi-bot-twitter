@@ -206,8 +206,7 @@ Output only the English bullet points, nothing else.
                     {"role": "system", "content": "You are a professional tech news translator and summarizer."},
                     {"role": "user", "content": prompt}
                 ],
-                max_completion_tokens=50000,
-                temperature=0.3
+                max_completion_tokens=50000
             )
             
             english_summary = response.choices[0].message.content.strip()
@@ -270,8 +269,7 @@ Output the translated items numbered, nothing else.
                     {"role": "system", "content": "You are a professional tech news translator."},
                     {"role": "user", "content": prompt}
                 ],
-                max_completion_tokens=2000,
-                temperature=0.3
+                max_completion_tokens=2000
             )
             
             translated = response.choices[0].message.content.strip()
