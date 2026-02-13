@@ -111,27 +111,34 @@ class Processor:
         for idx, content in enumerate(contents):
             self.config.logprint.info(f"Starting summarization for content {idx + 1}/{len(contents)}...")
             p_src = (
-                f"""あなたは著名テクノロジー企業の創業者です。あなたは以下の内容を要約してください。
-                要約は、会話履歴を踏まえつつ私が知りたいことの主旨を把握の上で作ってください。
-                仮に内容が英語でも回答は日本語でお願いします。
-                なお、回答がより高品質になるのならば、あなたの内部知識を加味して回答を作っても構いません。
-                回答のフォーマットは以下でお願いします:
+                f"""あなたはテクノロジーニュースを要約するアシスタントです。以下の内容を要約してください。
+
+                【重要な禁止事項】
+                - 「ふふん」「えへへ」「もちおだよ」などのキャラクター発言は絶対に禁止
+                - 挨拶や前置き、後書きは書かないでください
+                - 指定フォーマット以外の内容は出力しないでください
+                
+                仮に内容が英語でも要約は日本語でお願いします。
+                回答がより高品質になるなら、内部知識を加味しても構いません。
+                
+                【出力フォーマット（厳守）】
+                必ず以下のフォーマットのみを出力してください:
 
                 {self.config.FETCHER_START_OF_CONTENT}
-                Title: *要約前のTitle*
-                URL: *要約前のURL*
-                SRC: *要約前のSRC*
-                Snippet: *要約結果*
+                Title: (元記事のタイトルをそのまま記載)
+                URL: (元記事のURLをそのまま記載)
+                SRC: (元記事のソースをそのまま記載)
+                Snippet: (要約内容を2〜4文で記載。語尾は「〜だよ」「〜んだって」など柔らかく)
                 {self.config.FETCHER_END_OF_CONTENT}
 
-                以下が要約対象の内容です:
-                 {content}
+                【要約対象の内容】
+                {content}
                 """
             )
 
             def blocking_chat_completion():
-                messages = [{"role": "system", "content": self.config.CHARACTER}]
-                messages.extend(self.context)
+                # 個別要約では CHARACTER を使わず、中立的なシステムプロンプトを使用
+                messages = [{"role": "system", "content": "あなたはニュース要約を行う専門家です。指定されたフォーマットを厳守してください。"}]
                 messages.append({"role": "user", "content": p_src})
 
                 return self.aiclient.chat.completions.create(

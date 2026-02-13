@@ -28,7 +28,8 @@ if [ ! -f .env ]; then
 fi
 
 # 仮想環境のPythonを使用してmain.pyを実行
-/home/ubuntu/operations/mochi-bot-twitter/venv/bin/python3 /home/ubuntu/operations/mochi-bot-twitter/main.py >> "$CRON_LOG" 2>&1
+# nomoltbook: Moltbookアカウント問題が解決するまで無効化 (2026-02-12)
+/home/ubuntu/operations/mochi-bot-twitter/venv/bin/python3 /home/ubuntu/operations/mochi-bot-twitter/main.py nomoltbook >> "$CRON_LOG" 2>&1
 
 # 実行結果を記録
 EXIT_CODE=$?
