@@ -45,11 +45,16 @@ class Config:
     GROK_API_KEY          = os.getenv('GROK_API_KEY')
     GROK_MODEL            = os.getenv('GROK_MODEL')
 
-    HACKER_NEWS_COMMENTS  = 30
-    HACKER_NEWS_POINTS    = 95
+    # HackerNewsフィルタ（品質重視のため高めに設定）
+    HACKER_NEWS_COMMENTS  = 50   # コメント数の最低ライン
+    HACKER_NEWS_POINTS    = 150  # ポイントの最低ライン（深い議論のある記事のみ）
 
     MOLTBOOK_API_KEY      = os.getenv('MOLTBOOK_API_KEY')  # Optional - for authenticated requests
     MOLTBOOK_SEARCH_RESULTS = 10
+
+    # BlogRssFetcher設定（思考力・フレーミング力強化用）
+    BLOG_RSS_DAYS_LOOKBACK = 7   # 過去N日以内の記事を取得
+    BLOG_RSS_MAX_PER_BLOG = 2    # 各ブログから最大N記事
 
     TWITTER_API_KEY       = os.getenv('TWITTER_API_KEY')
     TWITTER_API_SECRET    = os.getenv('TWITTER_API_SECRET')

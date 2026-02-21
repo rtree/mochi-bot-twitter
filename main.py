@@ -12,6 +12,7 @@ from workers.bingFetcher import BingFetcher
 from workers.hackerNewsRssFetcher import HackerNewsRssFetcher
 from workers.googleFetcher import GoogleFetcher
 from workers.moltbookFetcher import MoltbookFetcher
+from workers.blogRssFetcher import BlogRssFetcher
 from workers.newsPageGenerator import NewsPageGenerator
 from workers.deduplicator import NewsDeduplicator
 
@@ -25,6 +26,7 @@ async def run_bot():
 
         if config.FETCHER_DO_FETCH:
             fetchers = [
+                        BlogRssFetcher(context, config),   # 思考力・フレーミング力強化（良質ブログ）
                         GoogleFetcher(context, config),
                         RedditFetcher(context, config),
                         HackerNewsRssFetcher(context, config),

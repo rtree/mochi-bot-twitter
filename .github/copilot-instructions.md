@@ -2,12 +2,22 @@
 
 ## プロジェクト概要
 
-AI ニュースを自動収集・要約し、Twitter/X・GitHub Pages・Moltbook へ配信する Python 非同期ボット。
+AI ニュースを自動収集・要約し、Twitter/X・GitHub Pages へ配信する Python 非同期ボット。
 
 - **言語**: Python 3 (asyncio)
-- **主要フロー**: Fetch → Process/Summarize → Deduplicate → Dispatch (Twitter, GitHub Pages, Moltbook)
-- **Fetcher**: Google, Reddit, HackerNews, Moltbook, (Bing/Grok は予備)
+- **主要フロー**: Fetch → Process/Summarize → Deduplicate → Dispatch (Twitter, GitHub Pages)
+- **Fetcher**: BlogRss（良質ブログ）, Google, Reddit, HackerNews, (Bing/Grok/Moltbook は予備)
 - **AI**: OpenAI GPT による要約生成
+
+### 🎯 ボットの方向性（重要）
+
+このボットは **即応性よりも以下を重視** する：
+
+1. **大きなトレンド**: 業界全体の方向性を示す構造変化
+2. **思考力強化**: 「なぜそうなるのか」の洞察
+3. **フレーミング力**: 問題の捉え方自体が新しいもの
+4. **コアコンピタンス認識**: 技術/ビジネスの本質的な競争優位
+5. **Cutting Edge識別**: 単なるバズワードではなく、実際に変化を起こすもの
 
 ---
 
@@ -70,6 +80,7 @@ Copilot はタスクを受け取ったとき、以下の **4つのロール** �
 main.py                  # エントリーポイント (asyncio.run)
 config.py                # 設定・環境変数管理
 workers/
+  blogRssFetcher.py      # 良質ブログ RSS フェッチャー（思考力強化ソース）
   googleFetcher.py       # Google 検索フェッチャー
   redditFetcher.py       # Reddit フェッチャー
   hackerNewsRssFetcher.py # HackerNews RSS フェッチャー

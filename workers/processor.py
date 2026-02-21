@@ -40,6 +40,17 @@ class Processor:
             - Markdown（**太字**、- 箇条書き など）は使わないでください
             - いきなり1つ目のニュース要約から始めてください
 
+            【選定基準 - Cutting Edgeを見極める】
+            以下の観点で「本当に重要な」ニュースを優先的に選んでください：
+            
+            1. **大きなトレンド**: 業界全体の方向性を示すもの（単発イベントより構造変化）
+            2. **思考力強化**: 「なぜそうなるのか」の洞察があるもの
+            3. **フレーミング力**: 問題の捉え方自体が新しいもの
+            4. **コアコンピタンス**: 技術/ビジネスの本質的な競争優位に関するもの
+            5. **Cutting Edge識別**: 単なるバズワードではなく、実際に変化を起こすもの
+            
+            ※「Expert Blog」や「Why:」フィールドがある記事は深い洞察を含むため優先してください
+
             【出力フォーマット】
             検索結果の中で重要なトピックを必ず9個以上選んで、以下の形式で出力してください。
             
@@ -55,22 +66,22 @@ class Processor:
             *記事URL（必ずhttps://で始まる完全なURL。検索結果から抽出すること）*
             {self.config.TWITTER_DELIMITER}
 
-            【出力例1】
-            Intelの新GPU「Battlemage」が発表されたよ。性能よりコストパフォーマンスを重視し、VRAM容量で競争力を高めてるみたい。特に$250で12GB VRAM搭載のArc B580は興味深いね
+            【出力例1 - 大きなトレンド】
+            Intelの新GPU「Battlemage」が発表されたよ。性能よりコストパフォーマンスを重視し、VRAM容量で競争力を高めてるみたい。GPU市場の競争軸がスペックから「用途別最適化」に移行してる兆候だね
 
             https://gamersnexus.net/gpus/intel-arc-b580-battlemage-gpu-review-benchmarks
             {self.config.TWITTER_DELIMITER}
 
-            【出力例2】
-            パキスタンで「AIQT 2025」シンポジウムが開催され、AIと量子コンピューターの融合について議論が行われたよ。国際的な専門家が集まり、量子インターネットやAI駆動の量子回路などの開発動向が紹介されたんだって
+            【出力例2 - 思考力強化】
+            Simon Willisonが指摘してるんだけど、LLMの本質的な課題は「推論」じゃなくて「検証」なんだって。出力を人間が検証できない領域での活用が最も危険という視点、すごく重要だよ
 
-            https://www.thenews.com.pk/print/1280851-aiqt-2025
+            https://simonwillison.net/2026/Feb/10/llm-verification/
             {self.config.TWITTER_DELIMITER}
 
-            【出力例3】
-            GitHubがAIコーディング機能を大幅強化したよ。新機能により開発速度が平均30%向上する見込みなんだって
+            【出力例3 - フレーミング力】
+            Benedict Evansの分析によると、AIスタートアップの競争優位は「モデル性能」ではなく「ワークフロー理解」にあるんだって。問題の捉え方自体を変える必要があるみたい
 
-            https://github.blog/ai-coding-features
+            https://www.ben-evans.com/benedictevans/ai-moats
             {self.config.TWITTER_DELIMITER}
 
             (※このように最低9個以上のニュースを連続して出力してください。各記事に必ずURLを含めること！)
@@ -87,6 +98,7 @@ class Processor:
             {snippets}
             
             上記の検索結果から、必ず9個以上の重要なニュースを選んで出力してください。
+            特に「Why:」フィールドがある記事は深い洞察を含むため、積極的に選んでください。
             """
          )
 
