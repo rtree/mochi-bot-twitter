@@ -20,7 +20,7 @@ class Dispatcher:
 
         if not tweets:
             self.config.logprint.error("No tweets to post after splitting.")
-            return
+            return False
 
         try:
             first_tweet = self.twclient.create_tweet(text=tweets[0])
@@ -31,12 +31,19 @@ class Dispatcher:
                 self.twclient.create_tweet(text=tweet)
                 self.config.logprint.info("Other tweet posted successfully.")
             self.config.logprint.info("Tweet thread posted successfully!")
+            return True
 
         except tweepy.errors.TooManyRequests as e:
             reset_time = e.response.headers.get('x-rate-limit-reset')
-            reset_time_human = datetime.utcfromtimestamp(int(reset_time)).strftime('%Y-%m-%d %H:%M:%S')
+            reset_time_human = datetime.utcfromtimestamp(int(reset_time)).strftime('%Y-%m-%d %H:%M:%S') if reset_time else "unknown"
             self.config.elogprint.error(f"post_to_twitter: Rate limit exceeded.: ")
             self.config.elogprint.error(f" Try again at           : {reset_time_human}")
             self.config.elogprint.error(f" x-rate-limit-limit     : {e.response.headers.get('x-rate-limit-limit')}")
             self.config.elogprint.error(f" x-rate-limit-remaining : {e.response.headers.get('x-rate-limit-remaining')}")
-            return
+            return False
+        except tweepy.errors.TweepyException as e:
+            self.config.elogprint.error(f"post_to_twitter: Twitter API error: {str(e)}")
+            return False
+        except Exception as e:
+            self.config.elogprint.error(f"post_to_twitter: Unexpected error: {str(e)}")
+            return False

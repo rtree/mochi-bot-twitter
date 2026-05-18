@@ -93,14 +93,6 @@ async def run_bot():
         all_tweets = [tweet.strip() for tweet in all_tweets if tweet.strip()]
         config.logprint.info(f"Total news items after deduplication: {len(all_tweets)}")
 
-        if config.TWITTER_DO_TWEET:
-            config.logprint.info("Starting Twitter posting (first 9 items)...")
-            dispatcher = Dispatcher(config)  # Instantiate Dispatcher with config
-            # Twitter投稿は最初の9個のみ
-            twitter_summary = config.TWITTER_DELIMITER.join(all_tweets[:9])
-            dispatcher.post_to_twitter(twitter_summary)
-            config.logprint.info("Twitter posting completed.")
-
         # GitHub Pagesへの投稿（全ニュース）
         if config.PAGES_DO_PUBLISH:
             config.logprint.info(f"Starting GitHub Pages publishing (all {len(all_tweets)} items)...")
@@ -108,6 +100,16 @@ async def run_bot():
             # GitHub Pagesには重複除外後の全量を投稿
             news_generator.generate_and_publish(summary_deduplicated, f_urls_merged)
             config.logprint.info("GitHub Pages publishing completed.")
+
+        if config.TWITTER_DO_TWEET:
+            config.logprint.info("Starting Twitter posting (first 9 items)...")
+            dispatcher = Dispatcher(config)  # Instantiate Dispatcher with config
+            # Twitter投稿は最初の9個のみ
+            twitter_summary = config.TWITTER_DELIMITER.join(all_tweets[:9])
+            if dispatcher.post_to_twitter(twitter_summary):
+                config.logprint.info("Twitter posting completed.")
+            else:
+                config.elogprint.error("Twitter posting failed; continuing after Pages publishing.")
 
         # Moltbookへの投稿（英語で、GitHub Pages相当の詳細な内容）
         if config.MOLTBOOK_DO_POST:
